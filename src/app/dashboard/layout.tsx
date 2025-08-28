@@ -9,7 +9,6 @@ import {
   Monitor, 
   Settings, 
   BarChart3, 
-  FileText,
   LogOut,
   User,
   Home,
@@ -42,7 +41,6 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
           setIsGuestMode(true);
           setShowGuestModal(true);
           
-          // Redirect guest users away from dashboard to dataset creator
           if (pathname === '/dashboard') {
             window.location.href = '/dashboard/dataset_creator';
             return;
@@ -244,7 +242,7 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
 
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden backdrop-blur-sm " style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
