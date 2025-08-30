@@ -77,7 +77,7 @@ export default function RealTimeTrackingPage() {
   const [showPacketModal, setShowPacketModal] = useState(false);
   const packetsEndRef = useRef<HTMLDivElement>(null);
 
-  const SERVER_URL = 'http://localhost:3001';
+  const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3001';
 
   // Auto-scroll to bottom when new packets arrive
   useEffect(() => {
