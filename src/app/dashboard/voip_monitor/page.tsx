@@ -94,12 +94,17 @@ export default function VOIPMonitor() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+    const [isGuestMode, setIsGuestMode] = useState(false);
 
     const { addNotification } = useNotifications();
 
-    // Load saved reports on component mount
+    // Load saved reports on component mount and check guest mode
     useEffect(() => {
         loadSavedReports();
+        
+        // Check if user is in guest mode
+        const guestMode = document.cookie.includes('guest_mode=true');
+        setIsGuestMode(guestMode);
     }, []);
 
     const loadSavedReports = async () => {
@@ -1801,6 +1806,43 @@ export default function VOIPMonitor() {
                             </div>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">No Analysis History</h3>
                             <p className="text-gray-500 mb-4">Your analysis reports will appear here after you run an analysis.</p>
+                            
+                            {isGuestMode && (
+                                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                                    <div className="flex items-center justify-center mb-3">
+                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <h4 className="text-sm font-semibold text-blue-800">Guest Account Notice</h4>
+                                    </div>
+                                    <p className="text-sm text-blue-700 mb-3">
+                                        As a guest user, your analysis reports are temporary and will be lost when you close your browser.
+                                    </p>
+                                    <p className="text-sm text-blue-700 mb-4">
+                                        <strong>Create an account to permanently store your analysis history and access it anytime!</strong>
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            // Clear guest cookies and redirect to sign up
+                                            document.cookie = 'guest_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                            document.cookie = 'guest_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                            document.cookie = 'guest_password=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                            document.cookie = 'guest_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                            document.cookie = 'guest_trial_expiry=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                            window.location.href = '/authpage/sign_up';
+                                        }}
+                                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                                    >
+                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        Create Account to Save Data
+                                    </button>
+                                </div>
+                            )}
+                            
                             <button
                                 onClick={loadSavedReports}
                                 className="text-sm text-blue-600 hover:text-blue-800 underline"
@@ -1810,6 +1852,36 @@ export default function VOIPMonitor() {
                         </div>
                     ) : (
                         <div className="space-y-3">
+                            {isGuestMode && (
+                                <div className="mb-4 p-3 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
+                                    <div className="flex items-center">
+                                        <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                            <svg className="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                            </svg>
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm text-yellow-800">
+                                                <strong>Guest Mode:</strong> Your analysis reports are temporary. 
+                                                <button
+                                                    onClick={() => {
+                                                        document.cookie = 'guest_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                                        document.cookie = 'guest_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                                        document.cookie = 'guest_password=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                                        document.cookie = 'guest_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                                        document.cookie = 'guest_trial_expiry=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                                                        window.location.href = '/authpage/sign_up';
+                                                    }}
+                                                    className="text-yellow-700 underline hover:text-yellow-900 ml-1"
+                                                >
+                                                    Create an account
+                                                </button>
+                                                to save them permanently.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {savedReports.map((report) => (
                                 <div key={report.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
                                     <div className="flex-1">

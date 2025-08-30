@@ -22,6 +22,8 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
+  const [isTrialExpired, setIsTrialExpired] = useState(false);
   const { startLoading, stopLoading } = useLoading();
   const pathname = usePathname();
 
@@ -34,6 +36,32 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
         const guestUsername = document.cookie.split('guest_username=')[1]?.split(';')[0];
         
         if (guestMode && guestUsername) {
+          // Check trial expiry
+          const trialExpiryCookie = document.cookie.split('guest_trial_expiry=')[1]?.split(';')[0];
+          if (trialExpiryCookie) {
+            const trialExpiry = new Date(trialExpiryCookie);
+            const now = new Date();
+            const daysLeft = Math.ceil((trialExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            
+            if (daysLeft <= 0) {
+              // Trial expired, clear cookies and redirect
+              document.cookie = 'guest_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+              document.cookie = 'guest_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+              document.cookie = 'guest_password=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+              document.cookie = 'guest_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+              document.cookie = 'guest_trial_expiry=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+              window.location.href = '/home';
+              return;
+            }
+            
+            setTrialDaysLeft(daysLeft);
+            setIsTrialExpired(false);
+          } else {
+            // No trial expiry found, set default 7 days
+            setTrialDaysLeft(7);
+            setIsTrialExpired(false);
+          }
+          
           setUser({
             id: 0, 
             email: 'guest@voiptrace.guest',
@@ -41,11 +69,6 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
           });
           setIsGuestMode(true);
           setShowGuestModal(true);
-          
-          if (pathname === '/dashboard') {
-            window.location.href = '/dashboard/dataset_creator';
-            return;
-          }
           
           setIsLoading(false);
           stopLoading();
@@ -80,48 +103,42 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
       name: 'Dashboard',
       href: '/dashboard',
       icon: Home,
-      description: 'Overview and quick actions',
-      guestAccess: false
+      description: 'Overview and quick actions'
     },
     {
       name: 'Dataset Creator',
       href: '/dashboard/dataset_creator',
       icon: Database,
-      description: 'Create and download datasets for analysis',
-      guestAccess: true
+      description: 'Create and download datasets for analysis'
     },
     {
       name: 'VOIP Monitor',
       href: '/dashboard/voip_monitor',
       icon: Monitor,
-      description: 'Upload and analyze call data for suspicious activity',
-      guestAccess: true
+      description: 'Upload and analyze call data for suspicious activity'
     },
     {
       name: 'Real-Time Tracking',
       href: '/dashboard/real_time_tracking',
       icon: Activity,
-      description: 'Live packet analysis and network monitoring',
-      guestAccess: false
+      description: 'Live packet analysis and network monitoring'
     },
     {
       name: 'Analytics',
       href: '/dashboard/analytics',
       icon: BarChart3,
-      description: 'View detailed analytics and reports',
-      guestAccess: false
+      description: 'View detailed analytics and reports'
     },
     {
       name: 'Settings',
       href: '/dashboard/settings',
       icon: Settings,
-      description: 'Manage account and system preferences',
-      guestAccess: false
+      description: 'Manage account and system preferences'
     }
   ];
 
-  // Filter navigation based on guest mode
-  const filteredNavigation = isGuestMode ? navigation.filter(item => item.guestAccess) : navigation;
+  // Show all navigation items for guest users during trial period
+  const filteredNavigation = navigation;
 
   const handleSignOut = async () => {
     try {
@@ -131,6 +148,7 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
         document.cookie = 'guest_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'guest_password=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         document.cookie = 'guest_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'guest_trial_expiry=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         window.location.href = '/home';
       } else {
         // Regular sign out for verified users
@@ -192,11 +210,11 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
                  <p className="text-xs text-slate-400">{user.email}</p>
                  {isGuestMode && (
                    <div className="flex items-center mt-1">
-                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                        </svg>
-                       Guest Mode
+                       Guest User
                      </span>
                    </div>
                  )}
@@ -276,54 +294,65 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
          </main>
        </div>
 
-       {/* Guest Mode Modal */}
+       {/* Trial Modal */}
        {showGuestModal && isGuestMode && (
-         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" >
+         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 overflow-y-auto" >
            <div className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}></div>
-           <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4">
+           <div className="relative bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 my-8 max-h-[90vh] overflow-y-auto">
              <div className="text-center" >
-               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                 <Shield className="w-8 h-8 text-white" />
+               <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                 <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                 </svg>
                </div>
                
-               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                 Welcome to VOIP Trace!
+               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+                 👤 Welcome, Guest User!
                </h2>
                
-               <p className="text-gray-600 mb-6">
-                 You're currently using a guest account. To access all features and save your data permanently, please sign up for a verified account.
-               </p>
-               
-               <div className="space-y-3">
-                 <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                     </svg>
-                   </div>
-                   <span className="text-sm text-green-800">Dataset Creator - Available</span>
+               <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 border border-green-200">
+                 <div className="text-4xl font-bold text-green-600 mb-2">
+                   🎯
                  </div>
-                 
-                 <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                     <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                     </svg>
-                   </div>
-                   <span className="text-sm text-green-800">VOIP Analysis - Available</span>
+                 <div className="text-lg text-gray-700 mb-1">
+                   Full Access
                  </div>
-                 
-                 <div className="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200">
-                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                     <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                     </svg>
-                   </div>
-                   <span className="text-sm text-gray-600">Dashboard, Analytics & Settings</span>
+                 <div className="text-sm text-gray-600">
+                   All features available to explore
                  </div>
                </div>
                
-                               <div className="flex flex-col sm:flex-row gap-3 mt-8">
+               <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">
+                 You have full access to all VOIP Trace features! However, as a guest user, some limitations apply.
+               </p>
+               
+               <div className="space-y-3 mb-4 sm:mb-6">
+                 <div className="flex items-center justify-center p-3 bg-green-50 rounded-lg border border-green-200">
+                   <svg className="w-4 h-4 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                   </svg>
+                   <span className="text-sm text-green-800 font-medium">All Features Accessible</span>
+                 </div>
+                 
+                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                   <div className="flex items-start space-x-2">
+                     <svg className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                     </svg>
+                     <div className="flex-1 min-w-0">
+                       <p className="text-xs sm:text-sm text-yellow-800 font-medium mb-1">Guest Mode Limitations:</p>
+                       <ul className="text-xs text-yellow-700 space-y-0.5 sm:space-y-1">
+                         <li>• Dashboard shows "Coming Soon" (no live data)</li>
+                         <li>• Analysis reports cannot be saved permanently</li>
+                         <li>• Settings changes are not saved</li>
+                         <li>• All data lost when browser closes</li>
+                       </ul>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+               
+               <div className="flex flex-col sm:flex-row gap-3 mt-8">
                   <button
                     onClick={() => {
                       // First sign out guest user, then navigate to sign up
@@ -333,25 +362,26 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
                         document.cookie = 'guest_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                         document.cookie = 'guest_password=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                         document.cookie = 'guest_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                        document.cookie = 'guest_trial_expiry=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
                         // Navigate to sign up page
                         window.location.href = '/authpage/sign_up';
                       }
                     }}
                     className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
                   >
-                    Sign Up Now
+                    Sign Up to Continue
                   </button>
                   
                   <button
                     onClick={() => setShowGuestModal(false)}
                     className="flex-1 cursor-pointer px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
                   >
-                    Continue
+                    Start Exploring
                   </button>
                 </div>
                
                <p className="text-xs text-gray-500 mt-4">
-                 Guest data is temporary and will be lost when you close your browser
+                 Trial data is temporary. Sign up to save your work permanently.
                </p>
              </div>
            </div>

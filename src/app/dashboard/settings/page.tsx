@@ -20,9 +20,14 @@ export default function Settings() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
+    
+    // Check if user is in guest mode
+    const guestMode = document.cookie.includes('guest_mode=true');
+    setIsGuestMode(guestMode);
   }, []);
 
   const fetchUserProfile = async () => {
@@ -94,6 +99,55 @@ export default function Settings() {
         </div>
       </div>
 
+      {/* Guest Mode Notice */}
+      {isGuestMode && (
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-1">
+              <h3 className="text-sm font-medium text-blue-800">
+                Guest Account - Settings Limited
+              </h3>
+              <div className="mt-2 text-sm text-blue-700">
+                <p>As a guest user, you can view settings but cannot save changes. Your preferences are temporary and will be lost when you close your browser.</p>
+                <p className="mt-2">
+                  <strong>Create an account to:</strong>
+                </p>
+                <ul className="mt-1 ml-4 list-disc text-sm">
+                  <li>Save your profile and preferences permanently</li>
+                  <li>Access advanced security settings</li>
+                  <li>Configure notification preferences</li>
+                  <li>Manage system configurations</li>
+                </ul>
+              </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => {
+                    // Clear guest cookies and redirect to sign up
+                    document.cookie = 'guest_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = 'guest_email=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = 'guest_password=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = 'guest_username=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    document.cookie = 'guest_trial_expiry=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    window.location.href = '/authpage/sign_up';
+                  }}
+                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Create Account for Full Settings Access
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200">
         {/* Tab Navigation */}
         <div className="border-b border-gray-200">
@@ -150,8 +204,13 @@ export default function Settings() {
                     type="text"
                     value={profileData.username}
                     onChange={(e) => setProfileData({...profileData, username: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                    placeholder="Enter your username"
+                    disabled={isGuestMode}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent ${
+                      isGuestMode 
+                        ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                        : 'border-gray-300 focus:ring-blue-500 text-gray-900'
+                    }`}
+                    placeholder={isGuestMode ? "Guest users cannot edit profile" : "Enter your username"}
                   />
                   <p className="text-xs text-gray-500 mt-1">This is your display name in the system</p>
                 </div>
@@ -162,8 +221,13 @@ export default function Settings() {
                     type="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                    placeholder="Enter your email address"
+                    disabled={isGuestMode}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent ${
+                      isGuestMode 
+                        ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
+                        : 'border-gray-300 focus:ring-blue-500 text-gray-900'
+                    }`}
+                    placeholder={isGuestMode ? "Guest users cannot edit profile" : "Enter your email address"}
                   />
                   <p className="text-xs text-gray-500 mt-1">Used for login and notifications</p>
                 </div>
@@ -172,12 +236,21 @@ export default function Settings() {
               <div className="pt-4 border-t border-gray-200">
                 <button
                   onClick={handleSaveProfile}
-                  disabled={isSaving}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  disabled={isSaving || isGuestMode}
+                  className={`px-6 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
+                    isGuestMode 
+                      ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
                 >
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? 'Saving...' : isGuestMode ? 'Save Disabled (Guest Mode)' : 'Save Changes'}
                 </button>
-                <p className="text-xs text-gray-500 mt-2">Changes will be applied immediately</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {isGuestMode 
+                    ? 'Create an account to save your profile changes permanently' 
+                    : 'Changes will be applied immediately'
+                  }
+                </p>
               </div>
             </div>
           )}

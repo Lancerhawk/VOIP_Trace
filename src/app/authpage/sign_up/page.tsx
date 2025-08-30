@@ -294,10 +294,15 @@ const SignUpPage = () => {
     const guestPassword = `guest_${Math.random().toString(36).substring(2, 15)}`;
     
     // Store guest credentials in cookies (not in database)
-    document.cookie = `guest_email=${guestEmail}; path=/; max-age=86400`; // 24 hours
-    document.cookie = `guest_password=${guestPassword}; path=/; max-age=86400`; // 24 hours
-    document.cookie = `guest_username=User; path=/; max-age=86400`; // 24 hours
-    document.cookie = `guest_mode=true; path=/; max-age=86400`; // 24 hours
+    const trialExpiry = new Date();
+    trialExpiry.setDate(trialExpiry.getDate() + 7);
+    const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+    
+    document.cookie = `guest_email=${guestEmail}; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_password=${guestPassword}; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_username=User; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_mode=true; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_trial_expiry=${trialExpiry.toISOString()}; path=/; max-age=${maxAge}`;
     
     // Redirect to dashboard
     window.location.href = '/dashboard';

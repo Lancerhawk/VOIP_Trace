@@ -44,16 +44,30 @@ export default function DashboardHome() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isGuestMode, setIsGuestMode] = useState(false);
+  const [trialDaysLeft, setTrialDaysLeft] = useState(0);
   const [recentActivity] = useState([
     { type: 'Dataset Generated', description: 'Created dataset with 150 users and 2,500 connections', time: '2 hours ago', status: 'success' },
     { type: 'Analysis Complete', description: 'Detected 12 suspicious users in uploaded dataset', time: '4 hours ago', status: 'warning' },
     { type: 'System Update', description: 'Updated detection rules for better accuracy', time: '1 day ago', status: 'info' }
   ]);
 
-  // Check if user is in guest mode
+  // Check if user is in guest mode and calculate trial days
   useEffect(() => {
     const guestMode = document.cookie.includes('guest_mode=true');
     setIsGuestMode(guestMode);
+    
+    if (guestMode) {
+      // Check trial expiry
+      const trialExpiryCookie = document.cookie.split('guest_trial_expiry=')[1]?.split(';')[0];
+      if (trialExpiryCookie) {
+        const trialExpiry = new Date(trialExpiryCookie);
+        const now = new Date();
+        const daysLeft = Math.ceil((trialExpiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        setTrialDaysLeft(Math.max(0, daysLeft));
+      } else {
+        setTrialDaysLeft(7); // Default 7 days if no expiry found
+      }
+    }
   }, []);
 
   // Get real-time data from localStorage if available
@@ -278,19 +292,19 @@ export default function DashboardHome() {
 
       {/* Guest Mode Notice */}
       {isGuestMode && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+        <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-xl">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Guest Mode Active
+              <h3 className="text-sm font-medium text-green-800">
+                👤 You are a Guest User
               </h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>You're using a guest account. Some features are limited. <Link href="/authpage/sign_up" className="font-medium underline hover:text-yellow-600">Sign up now</Link> to unlock all features and save your data permanently.</p>
+              <div className="mt-2 text-sm text-green-700">
+                <p>You have full access to all VOIP Trace features! <Link href="/authpage/sign_up" className="font-medium underline hover:text-green-600">Sign up now</Link> to save your data and access advanced features.</p>
               </div>
             </div>
           </div>
@@ -330,26 +344,6 @@ export default function DashboardHome() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {quickActions.map((action, index) => {
             const Icon = action.icon;
-            const isRestricted = isGuestMode && (action.title === 'View Analytics' || action.title === 'Settings');
-            
-            if (isRestricted) {
-              return (
-                <div key={index} className="bg-gray-300 text-gray-500 p-6 rounded-xl cursor-not-allowed">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Icon className="w-8 h-8 mb-3" />
-                      <h3 className="text-lg font-semibold mb-2">{action.title}</h3>
-                      <p className="text-gray-400 text-sm">Requires verified account</p>
-                    </div>
-                    <div className="w-5 h-5 opacity-50">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
             
             return (
               <Link key={index} href={action.href}>

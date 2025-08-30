@@ -50,10 +50,15 @@ export default function HomePage() {
                   const guestEmail = `guest_${Date.now()}@voiptrace.guest`;
                   const guestPassword = `guest_${Math.random().toString(36).substring(2, 15)}`;
                   
-                  document.cookie = `guest_email=${guestEmail}; path=/; max-age=86400`; 
-                  document.cookie = `guest_password=${guestPassword}; path=/; max-age=86400`;
-                  document.cookie = `guest_username=User; path=/; max-age=86400`; 
-                  document.cookie = `guest_mode=true; path=/; max-age=86400`; 
+                  const trialExpiry = new Date();
+                  trialExpiry.setDate(trialExpiry.getDate() + 7);
+                  const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+                  
+                  document.cookie = `guest_email=${guestEmail}; path=/; max-age=${maxAge}`; 
+                  document.cookie = `guest_password=${guestPassword}; path=/; max-age=${maxAge}`;
+                  document.cookie = `guest_username=User; path=/; max-age=${maxAge}`; 
+                  document.cookie = `guest_mode=true; path=/; max-age=${maxAge}`;
+                  document.cookie = `guest_trial_expiry=${trialExpiry.toISOString()}; path=/; max-age=${maxAge}`; 
                   
                   window.location.href = '/dashboard';
                 }}

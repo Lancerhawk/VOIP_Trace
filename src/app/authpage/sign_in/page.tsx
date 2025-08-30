@@ -96,10 +96,15 @@ const SignInPage = () => {
     const guestPassword = `guest_${Math.random().toString(36).substring(2, 15)}`;
     
     // Store guest credentials in cookies (not in database)
-    document.cookie = `guest_email=${guestEmail}; path=/; max-age=86400`; // 24 hours
-    document.cookie = `guest_password=${guestPassword}; path=/; max-age=86400`; // 24 hours
-    document.cookie = `guest_username=User; path=/; max-age=86400`; // 24 hours
-    document.cookie = `guest_mode=true; path=/; max-age=86400`; // 24 hours
+    const trialExpiry = new Date();
+    trialExpiry.setDate(trialExpiry.getDate() + 7);
+    const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+    
+    document.cookie = `guest_email=${guestEmail}; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_password=${guestPassword}; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_username=User; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_mode=true; path=/; max-age=${maxAge}`; 
+    document.cookie = `guest_trial_expiry=${trialExpiry.toISOString()}; path=/; max-age=${maxAge}`;
     
     // Redirect to dashboard
     window.location.href = '/dashboard';
@@ -218,13 +223,42 @@ const SignInPage = () => {
             </button>
 
             {/* Guest Sign In Button */}
-            <button
-              type="button"
-              onClick={handleGuestSignIn}
-              className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors border border-gray-300"
-            >
-              Try out as guest
-            </button>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleGuestSignIn}
+                className="w-full bg-gradient-to-r from-green-100 to-blue-100 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:from-green-200 hover:to-blue-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 border border-green-300"
+              >
+                <div className="flex items-center justify-center space-x-2">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Try 7-Day Free Trial as Guest</span>
+                </div>
+              </button>
+              
+              <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mt-0.5">
+                    <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-800 font-medium mb-1">Guest Trial Limitations:</p>
+                    <ul className="text-xs text-blue-700 space-y-1">
+                      <li>• No live dashboard data</li>
+                      <li>• Cannot save analysis reports</li>
+                      <li>• Settings changes not saved</li>
+                      <li>• Data lost when browser closes</li>
+                    </ul>
+                    <p className="text-xs text-blue-800 font-medium mt-2">
+                      <strong>Sign up for the best experience and full access!</strong>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
 
           {/* Divider */}
