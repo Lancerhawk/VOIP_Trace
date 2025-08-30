@@ -14,7 +14,11 @@ const NotificationManager: React.FC = () => {
   // Handle new notifications for pop-in display
   useEffect(() => {
     const latestNotification = notifications[0];
+    // Only show pop-in notifications for specific types (exclude 'success' and 'error')
+    const popInTypes = ['suspicious_user', 'blocked_country', 'vpn_detected', 'high_risk'];
+    
     if (latestNotification && 
+        popInTypes.includes(latestNotification.type) &&
         !latestNotification.read && 
         !popInNotifications.includes(latestNotification.id) &&
         !shownNotifications.has(latestNotification.id)) {
@@ -36,6 +40,10 @@ const NotificationManager: React.FC = () => {
       {popInNotifications.map((notificationId) => {
         const notification = notifications.find(n => n.id === notificationId);
         if (!notification) return null;
+        
+        // Only render pop-in notifications for supported types
+        const popInTypes = ['suspicious_user', 'blocked_country', 'vpn_detected', 'high_risk'];
+        if (!popInTypes.includes(notification.type)) return null;
         
         return (
           <PopInNotification
