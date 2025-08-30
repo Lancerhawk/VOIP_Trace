@@ -45,10 +45,24 @@ const NotificationManager: React.FC = () => {
         const popInTypes = ['suspicious_user', 'blocked_country', 'vpn_detected', 'high_risk'];
         if (!popInTypes.includes(notification.type)) return null;
         
+        // Type assertion to ensure compatibility with PopInNotification
+        const popInNotification = notification as {
+          id: string;
+          type: 'suspicious_user' | 'blocked_country' | 'vpn_detected' | 'high_risk';
+          title: string;
+          message: string;
+          userData?: {
+            username: string;
+            suspiciousScore: number;
+            country: string;
+            reasons: string[];
+          };
+        };
+        
         return (
           <PopInNotification
             key={notificationId}
-            notification={notification}
+            notification={popInNotification}
             onClose={handlePopInClose}
           />
         );
