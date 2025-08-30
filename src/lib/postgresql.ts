@@ -79,6 +79,38 @@ const initializeDatabase = async () => {
       );
     `);
 
+    // Create voip_analysis_reports table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS voip_analysis_reports (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        report_name VARCHAR(255) NOT NULL,
+        total_users INTEGER NOT NULL,
+        total_connections INTEGER NOT NULL,
+        suspicious_users INTEGER NOT NULL,
+        suspicious_connections INTEGER NOT NULL,
+        vpn_users INTEGER DEFAULT 0,
+        blocked_country_users INTEGER DEFAULT 0,
+        analysis_data JSONB NOT NULL,
+        uploaded_files JSONB,
+        html_report TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Add uploaded_files column if it doesn't exist (for existing tables)
+    await client.query(`
+      ALTER TABLE voip_analysis_reports 
+      ADD COLUMN IF NOT EXISTS uploaded_files JSONB;
+    `);
+
+    // Add html_report column if it doesn't exist (for existing tables)
+    await client.query(`
+      ALTER TABLE voip_analysis_reports 
+      ADD COLUMN IF NOT EXISTS html_report TEXT;
+    `);
+
     client.release();
     console.log('✅ Database tables initialized successfully');
     isDatabaseInitialized = true;
@@ -314,6 +346,147 @@ export const getSuspiciousActivities = async (userId: number, limit: number = 50
       [userId, limit]
     );
     return result.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// VoIP Analysis Reports operations
+export const createVoipAnalysisReport = async (userId: number, reportData: any) => {
+  await ensureDatabaseInitialized();
+  try {
+    // First try with all columns
+    let result;
+    try {
+      result = await pool.query(
+        `INSERT INTO voip_analysis_reports (user_id, report_name, total_users, total_connections, suspicious_users, suspicious_connections, vpn_users, blocked_country_users, analysis_data, uploaded_files, html_report) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, created_at`,
+        [
+          userId, 
+          reportData.report_name, 
+          reportData.total_users, 
+          reportData.total_connections, 
+          reportData.suspicious_users, 
+          reportData.suspicious_connections,
+          reportData.vpn_users || 0,
+          reportData.blocked_country_users || 0,
+          JSON.stringify(reportData.analysis_data),
+          reportData.uploaded_files ? JSON.stringify(reportData.uploaded_files) : null,
+          reportData.html_report || null
+        ]
+      );
+    } catch (columnError) {
+      // If columns don't exist, fallback to basic insert
+      console.log('Some columns not found, using fallback insert');
+      result = await pool.query(
+        `INSERT INTO voip_analysis_reports (user_id, report_name, total_users, total_connections, suspicious_users, suspicious_connections, vpn_users, blocked_country_users, analysis_data) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, created_at`,
+        [
+          userId, 
+          reportData.report_name, 
+          reportData.total_users, 
+          reportData.total_connections, 
+          reportData.suspicious_users, 
+          reportData.suspicious_connections,
+          reportData.vpn_users || 0,
+          reportData.blocked_country_users || 0,
+          JSON.stringify(reportData.analysis_data)
+        ]
+      );
+    }
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error in createVoipAnalysisReport:', error);
+    throw error;
+  }
+};
+
+export const getVoipAnalysisReports = async (userId: number, limit: number = 50) => {
+  await ensureDatabaseInitialized();
+  try {
+    // First try with uploaded_files column
+    let result;
+    try {
+      result = await pool.query(
+        'SELECT id, report_name, total_users, total_connections, suspicious_users, suspicious_connections, vpn_users, blocked_country_users, uploaded_files, created_at FROM voip_analysis_reports WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
+        [userId, limit]
+      );
+    } catch (columnError) {
+      // If uploaded_files column doesn't exist, fallback to basic query
+      console.log('uploaded_files column not found, using fallback query');
+      result = await pool.query(
+        'SELECT id, report_name, total_users, total_connections, suspicious_users, suspicious_connections, vpn_users, blocked_country_users, created_at FROM voip_analysis_reports WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
+        [userId, limit]
+      );
+    }
+    
+    // Parse uploaded_files JSON for each report
+    const reports = result.rows.map(report => {
+      if (report.uploaded_files && typeof report.uploaded_files === 'string') {
+        try {
+          report.uploaded_files = JSON.parse(report.uploaded_files);
+        } catch (parseError) {
+          console.log('Error parsing uploaded_files JSON:', parseError);
+          report.uploaded_files = null;
+        }
+      }
+      return report;
+    });
+    
+    return reports;
+  } catch (error) {
+    console.error('Error in getVoipAnalysisReports:', error);
+    throw error;
+  }
+};
+
+export const getVoipAnalysisReportById = async (reportId: number, userId: number) => {
+  await ensureDatabaseInitialized();
+  try {
+    const result = await pool.query(
+      'SELECT * FROM voip_analysis_reports WHERE id = $1 AND user_id = $2',
+      [reportId, userId]
+    );
+    if (result.rows.length > 0) {
+      const report = result.rows[0];
+      
+      // Parse analysis_data if it's a string, otherwise keep as is
+      if (typeof report.analysis_data === 'string') {
+        try {
+          report.analysis_data = JSON.parse(report.analysis_data);
+        } catch (parseError) {
+          console.log('Error parsing analysis_data JSON:', parseError);
+          // Keep as string if parsing fails
+        }
+      }
+      
+      // Parse uploaded_files if it exists and is a string
+      if (report.uploaded_files && typeof report.uploaded_files === 'string') {
+        try {
+          report.uploaded_files = JSON.parse(report.uploaded_files);
+        } catch (parseError) {
+          console.log('Error parsing uploaded_files JSON:', parseError);
+          report.uploaded_files = null;
+        }
+      }
+      
+      return report;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error in getVoipAnalysisReportById:', error);
+    throw error;
+  }
+};
+
+export const deleteVoipAnalysisReport = async (reportId: number, userId: number) => {
+  await ensureDatabaseInitialized();
+  try {
+    const result = await pool.query(
+      'DELETE FROM voip_analysis_reports WHERE id = $1 AND user_id = $2 RETURNING id',
+      [reportId, userId]
+    );
+    return result.rows.length > 0;
   } catch (error) {
     throw error;
   }

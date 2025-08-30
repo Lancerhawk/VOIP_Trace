@@ -12,7 +12,8 @@ import {
   LogOut,
   User,
   Home,
-  Shield
+  Shield,
+  Activity
 } from 'lucide-react';
 
 export default function DashboardLayout({children}: {children: React.ReactNode}) {
@@ -95,6 +96,13 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
       icon: Monitor,
       description: 'Upload and analyze call data for suspicious activity',
       guestAccess: true
+    },
+    {
+      name: 'Real-Time Tracking',
+      href: '/dashboard/real_time_tracking',
+      icon: Activity,
+      description: 'Live packet analysis and network monitoring',
+      guestAccess: false
     },
     {
       name: 'Analytics',

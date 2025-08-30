@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Upload, FileText, AlertTriangle, Users, Phone, Clock, Shield, BarChart3, Monitor, X, User, MapPin, Globe, Activity, Calendar, PhoneCall, AlertCircle, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Upload, FileText, AlertTriangle, Users, Phone, Clock, Shield, BarChart3, Monitor, X, User, MapPin, Globe, Activity, Calendar, PhoneCall, AlertCircle, Download, Trash2, History } from 'lucide-react';
+import { useNotifications } from '@/contexts/NotificationContext';
 
 interface UploadedFile {
     id: string;
@@ -38,6 +39,8 @@ interface UserMetadata {
         status: string;
         sourceIP: string;
         destination: string;
+        destinationIP: string;
+        packetBytes: number;
         country: string;
         latency: number;
     }>;
@@ -63,6 +66,25 @@ interface AnalysisResult {
     }>;
 }
 
+interface SavedReport {
+    id: number;
+    report_name: string;
+    total_users: number;
+    total_connections: number;
+    suspicious_users: number;
+    suspicious_connections: number;
+    vpn_users: number;
+    blocked_country_users: number;
+    created_at: string;
+    uploaded_files?: Array<{
+        id: string;
+        name: string;
+        type: string;
+        size: number;
+        content?: string;
+    }>;
+}
+
 export default function VOIPMonitor() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -70,6 +92,371 @@ export default function VOIPMonitor() {
     const [dragActive, setDragActive] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserMetadata | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+    const { addNotification } = useNotifications();
+
+    // Load saved reports on component mount
+    useEffect(() => {
+        loadSavedReports();
+    }, []);
+
+    const loadSavedReports = async () => {
+        setIsLoadingHistory(true);
+        try {
+            console.log('Loading saved reports...');
+            const response = await fetch('/api/voip-reports');
+            console.log('Response status:', response.status);
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Reports data:', data);
+                setSavedReports(data.reports || []);
+            } else {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+            }
+        } catch (error) {
+            console.error('Error loading saved reports:', error);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    };
+
+    const saveCompleteReport = async (analysisData: AnalysisResult) => {
+        try {
+            const reportName = `VOIP Analysis Report - ${new Date().toLocaleString()}`;
+            
+            // Prepare uploaded files data with content
+            const uploadedFilesData = await Promise.all(uploadedFiles.map(async (fileInfo) => {
+                const content = await new Promise<string>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        resolve(e.target?.result as string);
+                    };
+                    reader.readAsText(fileInfo.file);
+                });
+                
+                return {
+                    id: fileInfo.id,
+                    name: fileInfo.file.name,
+                    type: fileInfo.type,
+                    size: fileInfo.file.size,
+                    content: content
+                };
+            }));
+
+            // Generate the complete HTML report
+            const htmlContent = generateHTMLReport(analysisData);
+
+            console.log('Saving complete report with data:', {
+                report_name: reportName,
+                analysis_data: analysisData,
+                uploaded_files: uploadedFilesData,
+                html_report: htmlContent ? 'Generated' : 'Not generated'
+            });
+
+            const response = await fetch('/api/voip-reports', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    report_name: reportName,
+                    analysis_data: analysisData, // Complete analysis data
+                    uploaded_files: uploadedFilesData,
+                    html_report: htmlContent
+                })
+            });
+
+            console.log('Save response status:', response.status);
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Save response data:', data);
+                addNotification({
+                    type: 'success',
+                    title: 'Report Saved',
+                    message: 'Complete analysis report has been saved successfully'
+                });
+                // Reload the reports list
+                loadSavedReports();
+            } else {
+                const errorData = await response.json();
+                console.error('Save error response:', errorData);
+                throw new Error('Failed to save report');
+            }
+        } catch (error) {
+            console.error('Error saving report:', error);
+            addNotification({
+                type: 'error',
+                title: 'Save Failed',
+                message: 'Failed to save the analysis report'
+            });
+        }
+    };
+
+    const deleteReport = async (reportId: number) => {
+        try {
+            const response = await fetch(`/api/voip-reports?id=${reportId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                addNotification({
+                    type: 'success',
+                    title: 'Report Deleted',
+                    message: 'Analysis report has been deleted successfully'
+                });
+                // Reload the reports list
+                loadSavedReports();
+            } else {
+                throw new Error('Failed to delete report');
+            }
+        } catch (error) {
+            console.error('Error deleting report:', error);
+            addNotification({
+                type: 'error',
+                title: 'Delete Failed',
+                message: 'Failed to delete the analysis report'
+            });
+        }
+    };
+
+    const downloadCSVFile = (file: File) => {
+        const url = URL.createObjectURL(file);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    };
+
+
+
+    const generateHTMLReport = (analysisResult: AnalysisResult) => {
+        const style = `
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .section { margin-bottom: 30px; }
+                .section-title { 
+                    background-color: #2E86AB; 
+                    color: white; 
+                    padding: 10px; 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    text-align: center;
+                    border-radius: 5px;
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    margin-bottom: 20px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+                th { 
+                    background-color: #4A90E2; 
+                    color: white; 
+                    padding: 12px 8px; 
+                    text-align: left; 
+                    font-weight: bold;
+                    border: 1px solid #ddd;
+                }
+                td { 
+                    padding: 10px 8px; 
+                    border: 1px solid #ddd; 
+                    text-align: left;
+                }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                tr:hover { background-color: #f0f0f0; }
+                .summary-row { background-color: #E8F4FD; font-weight: bold; }
+                .risk-high { background-color: #FFE6E6; color: #D32F2F; font-weight: bold; }
+                .risk-medium { background-color: #FFF3E0; color: #F57C00; font-weight: bold; }
+                .risk-low { background-color: #E8F5E8; color: #388E3C; font-weight: bold; }
+                .status-success { background-color: #E8F5E8; color: #388E3C; }
+                .status-failed { background-color: #FFE6E6; color: #D32F2F; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .header h1 { color: #2E86AB; margin-bottom: 10px; }
+                .header p { color: #666; font-size: 14px; }
+            </style>
+        `;
+
+        const header = `
+            <div class="header">
+                <h1>VOIP Analysis Report</h1>
+                <p>Generated on: ${new Date().toLocaleString()}</p>
+                <p>Total Users: ${analysisResult.totalUsers} | Total Connections: ${analysisResult.totalConnections} | Suspicious Users: ${analysisResult.suspiciousUsers}</p>
+            </div>
+        `;
+
+        // Analysis Summary Section
+        const summarySection = `
+            <div class="section">
+                <div class="section-title">ANALYSIS SUMMARY</div>
+                <table>
+                    <tr class="summary-row">
+                        <td><strong>Metric</strong></td>
+                        <td><strong>Value</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Total Users</td>
+                        <td>${analysisResult.totalUsers}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Connections</td>
+                        <td>${analysisResult.totalConnections}</td>
+                    </tr>
+                    <tr>
+                        <td>Suspicious Users</td>
+                        <td>${analysisResult.suspiciousUsers}</td>
+                    </tr>
+                    <tr>
+                        <td>Suspicious Connections</td>
+                        <td>${analysisResult.suspiciousConnections}</td>
+                    </tr>
+                    <tr>
+                        <td>VPN Users Detected</td>
+                        <td>${analysisResult.detectionRules.find(rule => rule.rule === 'VPN Detection')?.count || 0}</td>
+                    </tr>
+                </table>
+            </div>
+        `;
+
+        // Detection Rules Section
+        const detectionRulesSection = `
+            <div class="section">
+                <div class="section-title">DETECTION RULES RESULTS</div>
+                <table>
+                    <tr class="summary-row">
+                        <th>Rule</th>
+                        <th>Description</th>
+                        <th>Triggered</th>
+                        <th>Count</th>
+                    </tr>
+                    ${analysisResult.detectionRules.map(rule => `
+                        <tr>
+                            <td>${rule.rule}</td>
+                            <td>${rule.description}</td>
+                            <td>${rule.triggered ? 'Yes' : 'No'}</td>
+                            <td>${rule.count}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            </div>
+        `;
+
+        // Suspicious Users Section
+        const suspiciousUsersSection = `
+            <div class="section">
+                <div class="section-title">SUSPICIOUS USERS DETAILED REPORT</div>
+                <table>
+                    <tr class="summary-row">
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Country</th>
+                        <th>Total Calls</th>
+                        <th>Successful</th>
+                        <th>Failed</th>
+                        <th>Avg Duration</th>
+                        <th>Risk Level</th>
+                        <th>Suspicious Score</th>
+                    </tr>
+                    ${analysisResult.allSuspiciousUsers.map(user => {
+                        const riskLevel = user.suspiciousScore >= 8 ? 'High Risk' : 
+                                        user.suspiciousScore >= 5 ? 'Medium Risk' : 'Low Risk';
+                        const riskClass = user.suspiciousScore >= 8 ? 'risk-high' : 
+                                        user.suspiciousScore >= 5 ? 'risk-medium' : 'risk-low';
+                        
+                        return `
+                            <tr>
+                                <td><strong>${user.username}</strong></td>
+                                <td>${user.email || 'N/A'}</td>
+                                <td>${user.phone || 'N/A'}</td>
+                                <td>${user.location || 'N/A'}</td>
+                                <td>${user.country || 'N/A'}</td>
+                                <td>${user.totalCalls}</td>
+                                <td>${user.successfulCalls}</td>
+                                <td>${user.failedCalls}</td>
+                                <td>${user.averageCallDuration}s</td>
+                                <td class="${riskClass}">${riskLevel}</td>
+                                <td class="${riskClass}">${user.suspiciousScore}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </table>
+            </div>
+        `;
+
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>VOIP Analysis Report</title>
+                ${style}
+            </head>
+            <body>
+                ${header}
+                ${summarySection}
+                ${detectionRulesSection}
+                ${suspiciousUsersSection}
+            </body>
+            </html>
+        `;
+    };
+
+    const downloadReportFromHistory = async (reportId: number) => {
+        try {
+            const response = await fetch(`/api/voip-reports/${reportId}`);
+            if (response.ok) {
+                const data = await response.json();
+                const report = data.report;
+                
+                // Use the saved HTML report if available, otherwise generate a simple one
+                let htmlContent;
+                if (report.html_report) {
+                    htmlContent = report.html_report;
+                } else {
+                    // Fallback for older reports without saved HTML
+                    htmlContent = generateHTMLReport(report.analysis_data);
+                }
+                
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+                
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `voip_analysis_report_${report.id}_${new Date().toISOString().split('T')[0]}.html`;
+                link.style.display = 'none';
+                
+                // Add to DOM, click, and remove
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up the URL object
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            } else {
+                throw new Error('Failed to fetch report');
+            }
+        } catch (error) {
+            console.error('Error downloading report:', error);
+            addNotification({
+                type: 'error',
+                title: 'Download Failed',
+                message: 'Failed to download the analysis report'
+            });
+        }
+    };
 
     const handleDrag = (e: React.DragEvent) => {
         e.preventDefault();
@@ -212,7 +599,10 @@ export default function VOIPMonitor() {
                     vpnUsers: new Set<string>(),
                     userCountries: new Map<string, Set<string>>(),
                     userLatencies: new Map<string, number[]>(),
-                    sipMismatches: new Set<string>()
+                    sipMismatches: new Set<string>(),
+                    // Blocked Countries Detection
+                    blockedCountryUsers: new Set<string>(),
+                    blockedCountries: ['RU', 'CN', 'KP', 'IR', 'SY', 'VE', 'CU', 'MM', 'BY', 'UZ']
                 };
 
                 // Analyze each connection
@@ -283,6 +673,16 @@ export default function VOIPMonitor() {
                     // Check for high latency (VPN indicator)
                     if (latency > 150) {
                         analysis.vpnUsers.add(username);
+                    }
+
+                    // Blocked Countries Detection - check both connection country and user country
+                    const userInfo = users.find((u: any) => (u.username || u.user_id) === username);
+                    const userCountry = userInfo?.country || country;
+                    
+                    if (analysis.blockedCountries.includes(country) || analysis.blockedCountries.includes(userCountry)) {
+                        analysis.blockedCountryUsers.add(username);
+                        analysis.suspiciousUsers.add(username);
+                        console.log(`🚨 Blocked country detected for user ${username}: connection country=${country}, user country=${userCountry}`);
                     }
                 });
 
@@ -361,6 +761,12 @@ export default function VOIPMonitor() {
                     description: 'Multiple countries, shared IPs, SIP mismatches, timing anomalies',
                     triggered: analysis.vpnUsers.size > 0,
                     count: analysis.vpnUsers.size
+                },
+                {
+                    rule: 'Blocked Countries',
+                    description: 'Users from blocked/restricted countries (RU, CN, KP, IR, SY, VE, CU, MM, BY, UZ)',
+                    triggered: analysis.blockedCountryUsers.size > 0,
+                    count: analysis.blockedCountryUsers.size
                 }
             ];
 
@@ -512,6 +918,12 @@ export default function VOIPMonitor() {
                         }
                     }
 
+                    // Blocked Countries Scoring
+                    if (analysis.blockedCountryUsers.has(username)) {
+                        score += 8; // Very high suspicion for blocked countries
+                        reasons.push('Blocked country detected');
+                    }
+
                     // Add some randomness to make scores more varied
                     const randomBonus = Math.floor(Math.random() * 3);
                     if (randomBonus > 0) {
@@ -557,6 +969,8 @@ export default function VOIPMonitor() {
                         status: conn.status,
                         sourceIP: conn.source_ip || 'Unknown',
                         destination: conn.destination || 'Unknown',
+                        destinationIP: conn.destination_ip || 'Unknown',
+                        packetBytes: parseInt(conn.packet_bytes) || 0,
                         country: conn.country || 'Unknown',
                         latency: parseInt(conn.latency_ms) || 0
                     }));
@@ -612,7 +1026,45 @@ export default function VOIPMonitor() {
                 allSuspiciousUsers: allSuspiciousUsers // Add all suspicious users to the result
             };
 
+            // Send notifications FIRST before setting result and saving report
+            if (result.topSuspiciousUsers.length > 0) {
+                result.topSuspiciousUsers.forEach((user, index) => {
+                    // Determine notification type based on user's characteristics
+                    let notificationType: 'suspicious_user' | 'blocked_country' | 'vpn_detected' | 'high_risk' = 'suspicious_user';
+                    
+                    if (user.reasons.some(reason => reason.includes('Blocked country'))) {
+                        notificationType = 'blocked_country';
+                    } else if (user.reasons.some(reason => reason.includes('VPN') || reason.includes('latency'))) {
+                        notificationType = 'vpn_detected';
+                    } else if (user.suspiciousScore >= 8) {
+                        notificationType = 'high_risk';
+                    }
+                    
+                    addNotification({
+                        type: notificationType,
+                        title: `🚨 Suspicious User Detected #${index + 1}`,
+                        message: `User ${user.username} has been flagged with a suspicion score of ${user.suspiciousScore}`,
+                        userData: {
+                            username: user.username,
+                            suspiciousScore: user.suspiciousScore,
+                            country: user.country || 'Unknown',
+                            reasons: user.reasons
+                        }
+                    });
+                });
+                
+                // Send summary notification
+                addNotification({
+                    type: 'high_risk',
+                    title: '🔍 Analysis Complete',
+                    message: `Detected ${result.suspiciousUsers} suspicious users out of ${result.totalUsers} total users`
+                });
+            }
+
             setAnalysisResult(result);
+            
+            // Automatically save the complete report after analysis
+            await saveCompleteReport(result);
         } catch (error) {
             console.error('Error analyzing dataset:', error);
         } finally {
@@ -875,17 +1327,21 @@ export default function VOIPMonitor() {
 
         const htmlContent = generateHTMLTable();
         const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
-        const link = document.createElement('a');
         
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', `voip_analysis_report_${new Date().toISOString().split('T')[0]}.html`);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `voip_analysis_report_${new Date().toISOString().split('T')[0]}.html`;
+        link.style.display = 'none';
+        
+        // Add to DOM, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up the URL object
+        setTimeout(() => URL.revokeObjectURL(url), 100);
     };
 
     return (
@@ -1074,6 +1530,13 @@ export default function VOIPMonitor() {
                                      <p className="text-gray-600">Multiple countries, shared IPs, SIP mismatches, timing anomalies</p>
                                  </div>
                              </div>
+                             <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                                 <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                                 <div>
+                                     <p className="font-medium text-gray-900">Blocked Countries</p>
+                                     <p className="text-gray-600">Users from blocked/restricted countries (RU, CN, KP, IR, SY, VE, CU, MM, BY, UZ)</p>
+                                 </div>
+                             </div>
                         </div>
                     </div>
                 </div>
@@ -1114,13 +1577,16 @@ export default function VOIPMonitor() {
                                              <Shield className="w-5 h-5 text-red-600" />
                                              <span className="text-sm font-medium text-red-600">Suspicious Activity Detected</span>
                                          </div>
-                                         <button
-                                             onClick={downloadAnalysisReport}
-                                             className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
-                                         >
-                                             <Download className="w-4 h-4" />
-                                             <span>Download Report</span>
-                                         </button>
+                                         <div className="flex items-center space-x-2">
+
+                                             <button
+                                                 onClick={downloadAnalysisReport}
+                                                 className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
+                                             >
+                                                 <Download className="w-4 h-4" />
+                                                 <span>Download Report</span>
+                                             </button>
+                                         </div>
                                      </div>
                                  </div>
 
@@ -1146,6 +1612,12 @@ export default function VOIPMonitor() {
                                             {analysisResult.detectionRules.find(rule => rule.rule === 'VPN Detection')?.count || 0}
                                         </div>
                                         <div className="text-sm text-blue-600">VPN Users</div>
+                                    </div>
+                                    <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                                        <div className="text-2xl font-bold text-red-600">
+                                            {analysisResult.detectionRules.find(rule => rule.rule === 'Blocked Countries')?.count || 0}
+                                        </div>
+                                        <div className="text-sm text-red-600">Blocked Countries</div>
                                     </div>
                                 </div>
                             </div>
@@ -1290,6 +1762,150 @@ export default function VOIPMonitor() {
                                     </p>
                                 </div>
                             </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* History Section */}
+            <div className="mt-8">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+                            <History className="w-5 h-5 text-blue-600" />
+                            <span>Analysis History</span>
+                            {savedReports.length > 0 && (
+                                <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                    {savedReports.length} reports
+                                </span>
+                            )}
+                        </h3>
+                        <button
+                            onClick={loadSavedReports}
+                            disabled={isLoadingHistory}
+                            className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                        >
+                            {isLoadingHistory ? 'Loading...' : 'Refresh'}
+                        </button>
+                    </div>
+
+                    {isLoadingHistory ? (
+                        <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                            <p className="text-gray-500 mt-2">Loading history...</p>
+                        </div>
+                    ) : savedReports.length === 0 ? (
+                        <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <History className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No Analysis History</h3>
+                            <p className="text-gray-500 mb-4">Your analysis reports will appear here after you run an analysis.</p>
+                            <button
+                                onClick={loadSavedReports}
+                                className="text-sm text-blue-600 hover:text-blue-800 underline"
+                            >
+                                Refresh to check for new reports
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {savedReports.map((report) => (
+                                <div key={report.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors">
+                                    <div className="flex-1">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <FileText className="w-5 h-5 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium text-gray-900">{report.report_name}</h4>
+                                                <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                                                    <span>{report.total_users} users</span>
+                                                    <span>{report.total_connections} connections</span>
+                                                    <span className="text-red-600 font-medium">{report.suspicious_users} suspicious</span>
+                                                    {report.vpn_users > 0 && (
+                                                        <span className="text-orange-600 font-medium">{report.vpn_users} VPN</span>
+                                                    )}
+                                                    {report.blocked_country_users > 0 && (
+                                                        <span className="text-red-600 font-medium">{report.blocked_country_users} blocked countries</span>
+                                                    )}
+                                                </div>
+                                                <p className="text-xs text-gray-400 mt-1">
+                                                    {new Date(report.created_at).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            onClick={() => downloadReportFromHistory(report.id)}
+                                            className="flex items-center space-x-1 px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                                        >
+                                            <Download className="w-4 h-4" />
+                                            <span>Report</span>
+                                        </button>
+                                        {report.uploaded_files && report.uploaded_files.length > 0 && (
+                                            <div className="relative group">
+                                                <button className="flex items-center space-x-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                                                    <FileText className="w-4 h-4" />
+                                                    <span>Files</span>
+                                                </button>
+                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                                                    <div className="py-2">
+                                                        {report.uploaded_files.map((fileInfo) => (
+                                                            <div
+                                                                key={fileInfo.id}
+                                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 cursor-pointer"
+                                                                onClick={() => {
+                                                                    if (fileInfo.content) {
+                                                                        // Download the actual CSV content
+                                                                        const blob = new Blob([fileInfo.content], { type: 'text/csv' });
+                                                                        const url = URL.createObjectURL(blob);
+                                                                        const link = document.createElement('a');
+                                                                        link.href = url;
+                                                                        link.download = fileInfo.name;
+                                                                        link.style.display = 'none';
+                                                                        document.body.appendChild(link);
+                                                                        link.click();
+                                                                        document.body.removeChild(link);
+                                                                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                                                                    } else {
+                                                                        // Fallback for older reports without content
+                                                                        const content = `This is a placeholder for the original file: ${fileInfo.name}\nFile type: ${fileInfo.type}\nFile size: ${(fileInfo.size / 1024 / 1024).toFixed(2)} MB\n\nNote: The original file content is not available for this older report.`;
+                                                                        const blob = new Blob([content], { type: 'text/plain' });
+                                                                        const url = URL.createObjectURL(blob);
+                                                                        const link = document.createElement('a');
+                                                                        link.href = url;
+                                                                        link.download = `${fileInfo.name}.txt`;
+                                                                        link.style.display = 'none';
+                                                                        document.body.appendChild(link);
+                                                                        link.click();
+                                                                        document.body.removeChild(link);
+                                                                        setTimeout(() => URL.revokeObjectURL(url), 100);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <FileText className="w-4 h-4" />
+                                                                <span className="truncate">{fileInfo.name}</span>
+                                                                {fileInfo.content && (
+                                                                    <span className="text-xs text-green-600 ml-auto">✓</span>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => deleteReport(report.id)}
+                                            className="flex items-center space-x-1 px-3 py-1.5 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            <span>Delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -1491,6 +2107,8 @@ export default function VOIPMonitor() {
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source IP</th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dest IP</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Packet Bytes</th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
                                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Latency</th>
                                             </tr>
@@ -1509,6 +2127,8 @@ export default function VOIPMonitor() {
                                                     </td>
                                                     <td className="px-4 py-3 text-sm text-gray-900">{conn.sourceIP}</td>
                                                     <td className="px-4 py-3 text-sm text-gray-900">{conn.destination}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900">{conn.destinationIP}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900">{(conn.packetBytes / 1024).toFixed(1)}KB</td>
                                                     <td className="px-4 py-3 text-sm text-gray-900">{conn.country}</td>
                                                     <td className="px-4 py-3 text-sm text-gray-900">{conn.latency}ms</td>
                                                 </tr>

@@ -47,14 +47,28 @@ export default function DatasetCreator() {
         // - Each suspicious user gets at least 150 calls to ensure rule breaking
 
         // Generate users with truly random distribution and complete metadata
-        const countries = ['US', 'UK', 'DE', 'FR', 'JP', 'CA', 'AU', 'NL', 'SE', 'NO', 'DK', 'FI', 'CH', 'AT', 'BE'];
+        const normalCountries = ['US', 'UK', 'DE', 'FR', 'JP', 'CA', 'AU', 'NL', 'SE', 'NO', 'DK', 'FI', 'CH', 'AT', 'BE'];
+        const blockedCountries = ['RU', 'CN', 'KP', 'IR', 'SY', 'VE', 'CU', 'MM', 'BY', 'UZ'];
+        const allCountries = [...normalCountries, ...blockedCountries];
         const timezones = ['UTC-8', 'UTC-7', 'UTC-6', 'UTC-5', 'UTC-4', 'UTC-3', 'UTC-2', 'UTC-1', 'UTC+0', 'UTC+1', 'UTC+2', 'UTC+3', 'UTC+4', 'UTC+5', 'UTC+6', 'UTC+7', 'UTC+8', 'UTC+9', 'UTC+10', 'UTC+11', 'UTC+12'];
-        const locations = ['New York', 'London', 'Berlin', 'Paris', 'Tokyo', 'Toronto', 'Sydney', 'Amsterdam', 'Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Zurich', 'Vienna', 'Brussels'];
+        const locations = ['New York', 'London', 'Berlin', 'Paris', 'Tokyo', 'Toronto', 'Sydney', 'Amsterdam', 'Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Zurich', 'Vienna', 'Brussels', 'Moscow', 'Beijing', 'Pyongyang', 'Tehran', 'Damascus', 'Caracas', 'Havana', 'Yangon', 'Minsk', 'Tashkent'];
         
         for (let i = 1; i <= config.numUsers; i++) {
-            const country = countries[Math.floor(Math.random() * countries.length)];
+            // For suspicious users, assign blocked countries (always enabled)
+            let country, location;
+            if (i <= config.numSuspiciousUsers) {
+                // Assign blocked countries to suspicious users only
+                country = blockedCountries[Math.floor(Math.random() * blockedCountries.length)];
+                const blockedLocations = ['Moscow', 'Beijing', 'Pyongyang', 'Tehran', 'Damascus', 'Caracas', 'Havana', 'Yangon', 'Minsk', 'Tashkent'];
+                location = blockedLocations[Math.floor(Math.random() * blockedLocations.length)];
+                console.log(`🚨 Suspicious user ${i} assigned to blocked country: ${country}`);
+            } else {
+                // Normal users get normal countries
+                country = normalCountries[Math.floor(Math.random() * normalCountries.length)];
+                const normalLocations = ['New York', 'London', 'Berlin', 'Paris', 'Tokyo', 'Toronto', 'Sydney', 'Amsterdam', 'Stockholm', 'Oslo', 'Copenhagen', 'Helsinki', 'Zurich', 'Vienna', 'Brussels'];
+                location = normalLocations[Math.floor(Math.random() * normalLocations.length)];
+            }
             const timezone = timezones[Math.floor(Math.random() * timezones.length)];
-            const location = locations[Math.floor(Math.random() * locations.length)];
             
             users.push({
                 id: i,
@@ -123,6 +137,8 @@ export default function DatasetCreator() {
                 callTime.setHours(9 + Math.floor(Math.random() * 9)); // 9 AM to 6 PM ONLY
 
                 const destination = `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`;
+                const destinationIP = `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+                const packetBytes = Math.floor(Math.random() * 1000000) + 50000; // 50KB to 1MB
 
                 connections.push({
                     id: connections.length + 1,
@@ -130,6 +146,8 @@ export default function DatasetCreator() {
                     username: user.username,
                     source_ip: user.ip_address, // Each normal user has unique IP
                     destination: destination,
+                    destination_ip: destinationIP,
+                    packet_bytes: packetBytes,
                     duration: duration,
                     call_time: callTime.toISOString(),
                     call_type: Math.random() > 0.7 ? 'video' : 'audio',
@@ -199,7 +217,7 @@ export default function DatasetCreator() {
 
                 // Add VPN-specific patterns for suspicious users if enabled
                 let sourceIP = ruleToBreak === 4 ? '192.168.1.100' : suspiciousUser.ip_address;
-                let country = 'US';
+                let country = suspiciousUser.country; // Use the user's assigned country (blocked for suspicious users)
                 let sipUserAgent = 'SIP/2.0';
                 let sipVia = 'SIP/2.0/UDP 192.168.1.100:5060';
                 let latency = Math.floor(Math.random() * 50) + 10; // Normal latency 10-60ms
@@ -228,12 +246,18 @@ export default function DatasetCreator() {
                     }
                 }
 
+                const destination = `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`;
+                const destinationIP = `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+                const packetBytes = Math.floor(Math.random() * 2000000) + 100000; // 100KB to 2MB for suspicious users
+
                 connections.push({
                     id: normalConnections + connections.length + 1,
                     user_id: suspiciousUser.id,
                     username: suspiciousUser.username,
                     source_ip: sourceIP,
-                    destination: `+1${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+                    destination: destination,
+                    destination_ip: destinationIP,
+                    packet_bytes: packetBytes,
                     duration: duration,
                     call_time: callTime.toISOString(),
                     call_type: Math.random() > 0.8 ? 'video' : 'audio',
@@ -271,6 +295,7 @@ export default function DatasetCreator() {
                 time_range_days: config.timeRange,
                 suspicious_users: config.numSuspiciousUsers,
                 vpn_detection_enabled: config.enableVPNDetection,
+                blocked_countries_enabled: true,
                 debug_info: {
                     suspicious_connections: suspiciousConnections,
                     normal_connections: normalConnections,
@@ -442,6 +467,20 @@ export default function DatasetCreator() {
                                 </div>
                             </div>
 
+                            <div className="flex-column items-center space-x-3 p-4 bg-red-50 rounded-lg border border-red-200">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+                                    <label className="text-sm font-medium text-red-800">
+                                        Blocked Countries Detection (Always Enabled)
+                                    </label>
+                                </div>
+                                <div className="flex-1 ml-3">
+                                    <p className="text-xs text-red-700">
+                                        Suspicious users are automatically assigned to blocked countries (RU, CN, KP, IR, SY, VE, CU, MM, BY, UZ) for geographic-based threat detection
+                                    </p>
+                                </div>
+                            </div>
+
                             <button
                                 onClick={generateDataset}
                                 disabled={isGenerating}
@@ -524,7 +563,12 @@ export default function DatasetCreator() {
                                         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                                             <div className="text-2xl font-bold text-blue-600">VPN</div>
                                             <div className="text-sm text-blue-600">Detection Enabled</div>
-                                            {/* <div className="text-xs text-blue-600 mt-1">Patterns included</div> */}
+                                        </div>
+                                    )}
+                                    {generatedDataset.metadata.blocked_countries_enabled && (
+                                        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                                            <div className="text-2xl font-bold text-red-600">BLOCKED</div>
+                                            <div className="text-sm text-red-600">Countries Enabled</div>
                                         </div>
                                     )}
                                 </div>
@@ -579,8 +623,10 @@ export default function DatasetCreator() {
                                                     <tr>
                                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
+                                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dest IP</th>
                                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
                                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Packet Bytes</th>
                                                         {config.enableVPNDetection && (
                                                             <>
                                                                 <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
@@ -594,6 +640,7 @@ export default function DatasetCreator() {
                                                         <tr key={conn.id}>
                                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{conn.username}</td>
                                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{conn.destination}</td>
+                                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{conn.destination_ip}</td>
                                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{conn.duration}s</td>
                                                             <td className="px-3 py-2 whitespace-nowrap">
                                                                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${conn.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -601,6 +648,7 @@ export default function DatasetCreator() {
                                                                     {conn.status}
                                                                 </span>
                                                             </td>
+                                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{(conn.packet_bytes / 1024).toFixed(1)}KB</td>
                                                             {config.enableVPNDetection && (
                                                                 <>
                                                                     <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{conn.country}</td>

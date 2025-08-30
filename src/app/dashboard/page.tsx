@@ -23,6 +23,10 @@ interface DashboardStats {
   detectionRate: number;
   recentScans: number;
   activeAlerts: number;
+  totalVpnUsers: number;
+  totalBlockedCountryUsers: number;
+  blockedCountriesCount: number;
+  blockedCountries: string[];
 }
 
 export default function DashboardHome() {
@@ -32,7 +36,11 @@ export default function DashboardHome() {
     suspiciousActivity: 0,
     detectionRate: 0,
     recentScans: 0,
-    activeAlerts: 0
+    activeAlerts: 0,
+    totalVpnUsers: 0,
+    totalBlockedCountryUsers: 0,
+    blockedCountriesCount: 0,
+    blockedCountries: []
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isGuestMode, setIsGuestMode] = useState(false);
@@ -61,7 +69,11 @@ export default function DashboardHome() {
           suspiciousActivity: parsed.suspiciousUsers || 0,
           detectionRate: parsed.detectionRate || 0,
           recentScans: parsed.recentScans || 1,
-          activeAlerts: parsed.suspiciousUsers > 0 ? parsed.suspiciousUsers : 0
+          activeAlerts: parsed.suspiciousUsers > 0 ? parsed.suspiciousUsers : 0,
+          totalVpnUsers: 0,
+          totalBlockedCountryUsers: 0,
+          blockedCountriesCount: 10,
+          blockedCountries: ['North Korea', 'Iran', 'Syria', 'Cuba', 'Myanmar', 'Afghanistan', 'Somalia', 'Sudan', 'Libya', 'Iraq']
         };
       }
       
@@ -75,7 +87,11 @@ export default function DashboardHome() {
           suspiciousActivity: 0,
           detectionRate: 0,
           recentScans: 1,
-          activeAlerts: 0
+          activeAlerts: 0,
+          totalVpnUsers: 0,
+          totalBlockedCountryUsers: 0,
+          blockedCountriesCount: 10,
+          blockedCountries: ['North Korea', 'Iran', 'Syria', 'Cuba', 'Myanmar', 'Afghanistan', 'Somalia', 'Sudan', 'Libya', 'Iraq']
         };
       }
     } catch (error) {
@@ -88,7 +104,11 @@ export default function DashboardHome() {
       suspiciousActivity: 0,
       detectionRate: 0,
       recentScans: 0,
-      activeAlerts: 0
+      activeAlerts: 0,
+      totalVpnUsers: 0,
+      totalBlockedCountryUsers: 0,
+      blockedCountriesCount: 10,
+      blockedCountries: ['North Korea', 'Iran', 'Syria', 'Cuba', 'Myanmar', 'Afghanistan', 'Somalia', 'Sudan', 'Libya', 'Iraq']
     };
   };
 
@@ -107,25 +127,24 @@ export default function DashboardHome() {
     try {
       setIsLoading(true);
       
-      // Get real-time stats from localStorage
-      const realTimeStats = getRealTimeStats();
-      setStats(realTimeStats);
-      
-      // Try to fetch from API as well (for future use)
+      // Try to fetch from API first (aggregated data from all reports)
       try {
         const response = await fetch('/api/dashboard/stats');
         if (response.ok) {
           const apiData = await response.json();
-          // Merge API data with real-time data
-          setStats(prev => ({
-            ...prev,
-            ...apiData
-          }));
+          if (apiData.success && apiData.stats) {
+            setStats(apiData.stats);
+            return; // Use API data if available
+          }
         }
       } catch (apiError) {
-        // API not available, continue with real-time data
-        console.log('API not available, using real-time data');
+        console.log('API not available, falling back to real-time data');
       }
+      
+      // Fallback to real-time stats from localStorage
+      const realTimeStats = getRealTimeStats();
+      setStats(realTimeStats);
+      
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
       // Set default values on error
@@ -135,7 +154,11 @@ export default function DashboardHome() {
         suspiciousActivity: 0,
         detectionRate: 0,
         recentScans: 0,
-        activeAlerts: 0
+        activeAlerts: 0,
+        totalVpnUsers: 0,
+        totalBlockedCountryUsers: 0,
+        blockedCountriesCount: 0,
+        blockedCountries: []
       });
     } finally {
       setIsLoading(false);
@@ -175,12 +198,12 @@ export default function DashboardHome() {
 
   const statsCards = [
     { 
-      label: 'Total Users', 
-      value: stats.totalUsers.toLocaleString(), 
-      icon: Users, 
+      label: 'Total Scans', 
+      value: stats.recentScans.toLocaleString(), 
+      icon: Activity, 
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
-      description: 'Registered users in system'
+      description: 'Analysis reports completed'
     },
     { 
       label: 'Total Connections', 
@@ -196,34 +219,34 @@ export default function DashboardHome() {
       icon: Shield, 
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
-      description: 'Detected suspicious patterns'
+      description: 'Total suspicious users detected'
     },
     { 
-      label: 'Detection Rate', 
-      value: `${stats.detectionRate}%`, 
-      icon: TrendingUp, 
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      description: 'AI detection accuracy'
+      label: 'Blocked Countries', 
+      value: stats.blockedCountriesCount.toLocaleString(), 
+      icon: AlertTriangle, 
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      description: 'Countries with blocked users'
     }
   ];
 
   const systemStatusCards = [
     {
-      label: 'Recent Scans',
-      value: stats.recentScans,
-      icon: Activity,
+      label: 'VPN Users Detected',
+      value: stats.totalVpnUsers,
+      icon: Shield,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       status: 'active'
     },
     {
-      label: 'Active Alerts',
-      value: stats.activeAlerts,
+      label: 'Blocked Country Users',
+      value: stats.totalBlockedCountryUsers,
       icon: AlertTriangle,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
-      status: stats.activeAlerts > 0 ? 'warning' : 'success'
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      status: stats.totalBlockedCountryUsers > 0 ? 'warning' : 'success'
     }
   ];
 
@@ -288,11 +311,11 @@ export default function DashboardHome() {
                   <p className="text-sm font-medium text-gray-600">{stat.label}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {isLoading ? '...' : 
-                     stat.value === '0' ? 'Coming Soon' : 
+                     stat.value === '0' && stats.recentScans === 0 ? 'Coming Soon' : 
                      stat.value}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {stat.value === '0' ? 'Upload data to see real stats' : stat.description}
+                    {stat.value === '0' && stats.recentScans === 0 ? 'Upload data to see real stats' : stat.description}
                   </p>
                 </div>
               </div>
@@ -430,6 +453,25 @@ export default function DashboardHome() {
                     </span>
                   </div>
                 </div>
+
+                {/* Blocked Countries List */}
+                {stats.blockedCountries.length > 0 && (
+                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                        <AlertTriangle className="w-4 h-4 text-red-600" />
+                      </div>
+                      <span className="font-medium text-red-900">Blocked Countries</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {stats.blockedCountries.map((country, index) => (
+                        <span key={index} className="px-2 py-1 text-xs font-medium bg-red-200 text-red-800 rounded-full">
+                          {country}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-8">
