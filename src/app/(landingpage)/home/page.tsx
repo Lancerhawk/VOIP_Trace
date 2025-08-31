@@ -18,15 +18,15 @@ export default function HomePage() {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
-              Monitor & Secure
+              Monitor & Analyze
               <span className="block bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent">
-                Your VoIP Calls
+                VoIP Communications
               </span>
             </h1>
             
             <p className="text-xl md:text-2xl text-blue-100 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Advanced call logging, real-time monitoring, and comprehensive security for your business communications. 
-              Protect your VoIP infrastructure with enterprise-grade solutions.
+              Real-time packet capture, threat detection, and comprehensive analysis for VoIP security. 
+              Built for law enforcement, security professionals, and telecom administrators.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -34,7 +34,7 @@ export default function HomePage() {
                 href="/authpage/sign_up" 
                 className="group relative px-8 py-4 bg-white text-blue-900 font-semibold rounded-xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 transform hover:-translate-y-1"
               >
-                <span className="relative z-10">Start Free Trial</span>
+                <span className="relative z-10">Register Now</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </Link>
               
@@ -64,7 +64,7 @@ export default function HomePage() {
                 }}
                 className="px-8 py-4 border-2 border-white/30 text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300 backdrop-blur-sm cursor-pointer"
               >
-                Try out the system with guest account
+                Start free Trial with guest account
               </button>
             </div>
           </div>
@@ -139,10 +139,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Enterprise-Grade VoIP Security
+              Advanced VoIP Analysis & Security
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive monitoring and security features designed for modern businesses
+              Real-time packet capture, threat detection, and comprehensive analysis for VoIP security professionals
             </p>
           </div>
           
@@ -154,26 +154,26 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 ),
-                title: "Real-Time Analytics",
-                description: "Monitor call quality, duration, and patterns with live dashboards and detailed reporting."
+                title: "Real-Time Packet Capture",
+                description: "Live network traffic monitoring with TShark integration for comprehensive VoIP analysis and threat detection."
               },
               {
                 icon: (
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 ),
-                title: "Advanced Security",
-                description: "Protect against fraud, DDoS attacks, and unauthorized access with enterprise security protocols."
+                title: "Threat Detection",
+                description: "Advanced detection rules for suspicious patterns, fraud detection, and anomalous communication behavior analysis."
               },
               {
                 icon: (
                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 ),
-                title: "Instant Alerts",
-                description: "Get notified immediately of suspicious activity, system issues, or performance degradation."
+                title: "Comprehensive Reporting",
+                description: "Generate detailed HTML reports for evidence documentation and case analysis for law enforcement use."
               }
             ].map((feature, index) => (
               <div key={index} className="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
@@ -193,10 +193,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             {[
-              { number: "99.9%", label: "Uptime Guarantee" },
-              { number: "24/7", label: "Support Available" },
-              { number: "50K+", label: "Calls Monitored" },
-              { number: "100+", label: "Enterprise Clients" }
+              { number: "6+", label: "Detection Rules" },
+              { number: "Real-Time", label: "Packet Analysis" },
+              { number: "TShark", label: "Integration" },
+              { number: "Guest Mode", label: "Available" }
             ].map((stat, index) => (
               <div key={index} className="group">
                 <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2 group-hover:scale-110 transition-transform duration-300">
@@ -213,10 +213,10 @@ export default function HomePage() {
       <section className="py-24 bg-gradient-to-r from-blue-600 to-indigo-700">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Secure Your VoIP Infrastructure?
+            Ready to Analyze VoIP Communications?
           </h2>
           <p className="text-xl text-blue-100 mb-12">
-            Join thousands of businesses that trust VoIP Trace for their communication security needs.
+            Start monitoring and analyzing VoIP traffic with our comprehensive security platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 

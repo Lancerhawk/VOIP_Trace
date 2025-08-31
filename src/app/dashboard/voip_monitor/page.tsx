@@ -111,16 +111,47 @@ export default function VOIPMonitor() {
         setIsLoadingHistory(true);
         try {
             console.log('Loading saved reports...');
+            
+            // Check if user is in guest mode
+            const guestMode = document.cookie.includes('guest_mode=true');
+            if (guestMode) {
+                console.log('Guest mode detected - skipping saved reports load');
+                setSavedReports([]);
+                return;
+            }
+            
             const response = await fetch('/api/voip-reports');
             console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
             
             if (response.ok) {
                 const data = await response.json();
                 console.log('Reports data:', data);
                 setSavedReports(data.reports || []);
             } else {
-                const errorData = await response.json();
-                console.error('Error response:', errorData);
+                // Handle error response more gracefully
+                let errorMessage = 'Failed to load reports';
+                let errorData = null;
+                
+                try {
+                    const responseText = await response.text();
+                    console.log('Raw error response:', responseText);
+                    
+                    if (responseText) {
+                        errorData = JSON.parse(responseText);
+                        if (errorData && errorData.error) {
+                            errorMessage = errorData.error;
+                        }
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing error response:', parseError);
+                    errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                }
+                
+                console.error('Failed to load saved reports:', errorMessage);
+                if (errorData) {
+                    console.error('Error data:', errorData);
+                }
             }
         } catch (error) {
             console.error('Error loading saved reports:', error);
@@ -990,7 +1021,7 @@ export default function VOIPMonitor() {
                         location: userInfo?.location || 'Unknown',
                         country: userInfo?.country || 'US',
                         timezone: userInfo?.timezone || 'UTC-5',
-                        registrationDate: userInfo?.registration_date || '2024-01-01',
+                        registrationDate: userInfo?.registration_date || '2025-01-01',
                         lastActive: userConnections.length > 0 ? userConnections[userConnections.length - 1].call_time : 'Unknown',
                         totalCalls,
                         successfulCalls,

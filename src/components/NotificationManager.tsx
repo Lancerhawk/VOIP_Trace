@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import NotificationIcon from './NotificationIcon';
 import NotificationSidebar from './NotificationSidebar';
 import PopInNotification from './PopInNotification';
@@ -10,6 +11,15 @@ const NotificationManager: React.FC = () => {
   const { notifications } = useNotifications();
   const [popInNotifications, setPopInNotifications] = useState<string[]>([]);
   const [shownNotifications, setShownNotifications] = useState<Set<string>>(new Set());
+  const pathname = usePathname();
+
+  // Check if we're on auth pages or landing pages where notifications shouldn't show
+  const isAuthPage = pathname?.startsWith('/authpage') || 
+                    pathname?.startsWith('/home') || 
+                    pathname?.startsWith('/about') || 
+                    pathname?.startsWith('/contact') || 
+                    pathname?.startsWith('/services') ||
+                    pathname === '/';
 
   // Handle new notifications for pop-in display
   useEffect(() => {
@@ -30,6 +40,11 @@ const NotificationManager: React.FC = () => {
   const handlePopInClose = (id: string) => {
     setPopInNotifications(prev => prev.filter(notificationId => notificationId !== id));
   };
+
+  // Don't render notifications on auth pages or landing pages
+  if (isAuthPage) {
+    return null;
+  }
 
   return (
     <>

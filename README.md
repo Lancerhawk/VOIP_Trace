@@ -14,78 +14,84 @@ Develop a solution to trace VoIP calls by analyzing network traffic, metadata, a
 | **Key Task** | **Status** | **Current Implementation** | **Future Plans** |
 |--------------|------------|---------------------------|------------------|
 | **Understand VoIP Protocols** | ✅ **Completed** | SIP/RTP protocol knowledge integrated into analysis rules | Advanced protocol parsing |
-| **Develop Packet Inspection Tools** | 🔄 **In Progress** | CSV-based metadata extraction and analysis | Real-time packet capture and DPI |
-| **Perform Flow and Timing Analysis** | ✅ **Completed** | Call duration, timing patterns, and frequency analysis | Real-time flow monitoring |
-| **Capture and Analyze Metadata** | ✅ **Completed** | IP addresses, call duration, frequency, device info extraction | Live metadata capture |
-| **Correlate with Known Databases** | 🔄 **In Progress** | IP pattern analysis and suspicious behavior detection | Integration with threat intelligence feeds |
-| **Identify Anomalous Communication Behavior** | ✅ **Completed** | 6 detection rules for suspicious patterns | Machine learning-based detection |
-| **Maintain Privacy Compliance** | ✅ **Completed** | Metadata-only analysis, no content access | Enhanced privacy controls |
-| **Build Real-Time Monitoring Dashboard** | 🔄 **In Progress** | Static dashboard with analysis results | Live monitoring with real-time updates |
-| **Implement Alert Mechanisms** | ✅ **Completed** | Real-time notification system with pop-in alerts and sidebar | Advanced alert routing and escalation |
-| **Test in Simulated and Real Environments** | ✅ **Completed** | Synthetic dataset generation and testing | Real-world dataset integration |
+| **Develop Packet Inspection Tools** | ✅ **Completed** | Real-time packet capture with TShark, CSV analysis, and DPI capabilities | Advanced protocol parsing |
+| **Perform Flow and Timing Analysis** | ✅ **Completed** | Call duration, timing patterns, and frequency analysis with real-time monitoring | Enhanced real-time flow monitoring |
+| **Capture and Analyze Metadata** | ✅ **Completed** | IP addresses, call duration, frequency, device info extraction with live capture | Enhanced live metadata capture |
+| **Correlate with Known Databases** | ✅ **Completed** | Custom threat intelligence database with IP patterns, country blocking, and rule-based detection | Integration with external threat feeds |
+| **Identify Anomalous Communication Behavior** | ✅ **Completed** | 6+ detection rules for suspicious patterns with real-time analysis | Machine learning-based detection |
+| **Maintain Privacy Compliance** | ✅ **Completed** | Metadata-only analysis, no content access, secure data handling | Enhanced privacy controls |
+| **Build Real-Time Monitoring Dashboard** | ✅ **Completed** | Live dashboard with real-time stats, notifications, and monitoring capabilities | Advanced analytics and reporting |
+| **Implement Alert Mechanisms** | ✅ **Completed** | Real-time notification system with pop-in alerts, sidebar, and email notifications | Advanced alert routing and escalation |
+| **Test in Simulated and Real Environments** | ✅ **Completed** | Synthetic dataset generation, real-time packet capture testing, and comprehensive validation | Real-world dataset integration |
 
 ### **Current Prototype Capabilities**
 
 #### ✅ **Fully Implemented Features**
 - **VoIP Protocol Analysis**: Understanding of SIP/RTP protocols integrated into detection algorithms
+- **Real-Time Packet Inspection**: Live packet capture with TShark, DPI capabilities, and rule-based analysis
 - **Metadata Extraction**: Complete extraction of caller IPs, call duration, frequency, device information
-- **Flow and Timing Analysis**: Analysis of call patterns, duration, and timing anomalies
-- **Suspicious Behavior Detection**: 6 comprehensive detection rules for anomalous communication
+- **Flow and Timing Analysis**: Analysis of call patterns, duration, and timing anomalies with real-time monitoring
+- **Suspicious Behavior Detection**: 6+ comprehensive detection rules for anomalous communication
 - **Privacy-Compliant Analysis**: Metadata-only processing, no call content access
 - **Synthetic Testing Environment**: Advanced dataset generation for testing and validation
-- **User Authentication**: Secure access control for law enforcement personnel
-- **Analysis Dashboard**: Comprehensive results visualization and reporting
+- **User Authentication**: Secure access control with email verification, guest mode, and session management
+- **Real-Time Monitoring Dashboard**: Live dashboard with real-time stats, notifications, and system monitoring
+- **Threat Intelligence Database**: Custom database with IP patterns, country blocking, and rule-based detection
 - **Real-Time Notification System**: Floating notification icon, sidebar, and pop-in alerts for suspicious activity
-
-#### 🔄 **Partially Implemented Features**
-- **Packet Inspection**: CSV-based analysis (real-time packet capture pending)
-- **Database Correlation**: Basic IP pattern analysis (threat intelligence integration pending)
-- **Monitoring Dashboard**: Static results display (real-time monitoring pending)
+- **Analysis Dashboard**: Comprehensive results visualization and reporting
+- **Packet Analysis Server**: Dedicated Node.js server with MongoDB integration for real-time packet processing
 
 #### 📋 **Planned Future Features**
-- **Real-Time Packet Capture**: Live network traffic monitoring and DPI
-- **Advanced Protocol Parsing**: Deep SIP/RTP protocol analysis
-- **Threat Intelligence Integration**: Correlation with known malicious entities
-- **Machine Learning Detection**: AI-powered anomaly detection
-- **Live Monitoring**: Continuous surveillance capabilities
-- **Real-World Integration**: Production deployment with live data
+- **Advanced Protocol Parsing**: Deep SIP/RTP protocol analysis with enhanced parsing
+- **External Threat Intelligence Integration**: Correlation with external threat feeds and databases
+- **Machine Learning Detection**: AI-powered anomaly detection and pattern recognition
+- **Enhanced Real-Time Monitoring**: Advanced continuous surveillance capabilities
+- **Production Deployment**: Real-world integration with live VoIP infrastructure
+- **Mobile Application**: Mobile interface for field operations
+- **API Integrations**: Third-party security tool integrations
 
 ## 🎯 Current Prototype Status
 
-### **What This Prototype Demonstrates**
-This current implementation serves as a **proof-of-concept prototype** that demonstrates the core capabilities needed for VoIP call tracing and analysis. While it doesn't yet perform real-time packet capture, it successfully validates the analytical approach and detection algorithms that would be used in a production system.
+### **What This System Demonstrates**
+This implementation is a **fully functional VoIP monitoring and analysis system** that provides comprehensive capabilities for VoIP call tracing and analysis. It includes real-time packet capture, live monitoring, and advanced detection algorithms suitable for production use.
 
-### **Prototype Strengths**
-- **Validated Detection Algorithms**: 6 comprehensive detection rules that effectively identify suspicious VoIP patterns
-- **Complete Analysis Pipeline**: End-to-end workflow from data ingestion to suspicious user identification
+### **System Strengths**
+- **Real-Time Packet Capture**: Live network traffic monitoring with TShark integration
+- **Validated Detection Algorithms**: 6+ comprehensive detection rules that effectively identify suspicious VoIP patterns
+- **Complete Analysis Pipeline**: End-to-end workflow from live packet capture to suspicious user identification
 - **Privacy-Compliant Design**: Metadata-only analysis without accessing call content
-- **Scalable Architecture**: Built to handle large datasets and can be extended for real-time processing
-- **Law Enforcement Ready**: Secure authentication and comprehensive reporting for investigative use
+- **Scalable Architecture**: Built to handle large datasets with real-time processing capabilities
+- **Law Enforcement Ready**: Secure authentication, comprehensive reporting, and real-time monitoring for investigative use
+- **Production-Ready**: Deployable system with proper error handling, logging, and monitoring
 
-### **Prototype Limitations**
-- **Static Data Analysis**: Currently processes pre-collected CSV data rather than live network traffic
-- **Simulated Environment**: Uses synthetic datasets rather than real-world VoIP traffic
-- **No Real-Time Monitoring**: Analysis is performed on uploaded datasets, not live streams
-- **Limited Protocol Parsing**: Basic SIP/RTP understanding without deep packet inspection
+### **Current Capabilities**
+- **Live Packet Analysis**: Real-time packet capture and analysis using TShark
+- **Real-Time Monitoring**: Live dashboard with continuous updates and notifications
+- **Threat Intelligence**: Custom database with IP patterns, country blocking, and rule-based detection
+- **Synthetic Data Generation**: Advanced dataset creation for testing and validation
+- **Comprehensive Reporting**: Detailed analysis reports and evidence generation
+- **Secure Authentication**: Complete user management with email verification and guest access
 
 ### **Next Development Phase**
-The next phase will focus on transitioning from this prototype to a production-ready system by implementing:
-1. **Real-time packet capture** from network interfaces
-2. **Deep packet inspection** for live SIP/RTP analysis
-3. **Live monitoring dashboard** with real-time updates
-4. **Automated alerting system** for immediate threat detection
-5. **Integration with real VoIP infrastructure** for production deployment
+The next phase will focus on enhancing the production system with:
+1. **Advanced protocol parsing** for deeper SIP/RTP analysis
+2. **External threat intelligence integration** with commercial feeds
+3. **Machine learning detection** for AI-powered anomaly detection
+4. **Enhanced real-time monitoring** with advanced analytics
+5. **Mobile application** for field operations
+6. **API integrations** with third-party security tools
 
 ## 🚔 Law Enforcement Use Case Validation
 
-### **Current Prototype Capabilities for Law Enforcement**
+### **Current System Capabilities for Law Enforcement**
 
 #### **Investigation Workflow Support**
-1. **Data Ingestion**: Upload call logs from VoIP providers or network captures
-2. **Automated Analysis**: System automatically identifies suspicious patterns and users
+1. **Live Data Ingestion**: Real-time packet capture from network interfaces or upload call logs from VoIP providers
+2. **Automated Analysis**: System automatically identifies suspicious patterns and users in real-time
 3. **Evidence Generation**: Download comprehensive HTML reports for case documentation
 4. **User Profiling**: Detailed metadata analysis for suspect identification
 5. **Pattern Recognition**: Identify communication networks and suspicious behaviors
+6. **Real-Time Monitoring**: Continuous surveillance with instant alerts for suspicious activity
 
 #### **Detection Capabilities for Criminal Activity**
 - **Fraud Detection**: High-frequency calling patterns typical of phone scams
@@ -146,24 +152,32 @@ The next phase will focus on transitioning from this prototype to a production-r
 - **Risk Scoring**: Dynamic suspicious activity scoring system
 
 ### 4. **Dashboard & Analytics**
-- **Real-time Statistics Report generation**: Live updates from analysis results generation
+- **Real-time Statistics**: Live updates from analysis results and packet capture
+- **System Monitoring**: Real-time system status and health monitoring
+- **Activity Tracking**: Recent activity feed with detailed logs
+- **Quick Actions**: Easy access to all system features
+- **Guest Mode Support**: Differentiated experience for guest vs verified users
 
-### 5. **Real-time Packet Analysis Server** (NEW!)
-- **Node.js Backend**: Express server with MongoDB integration
+### 5. **Real-time Packet Analysis Server**
+- **Node.js Backend**: Express server with MongoDB integration (Port 3001)
 - **TShark Integration**: Real-time packet capture and analysis using Wireshark's command-line tool
 - **Rule-based Detection**: Configurable blacklists for IPs, countries, and ports
 - **RESTful API**: Complete API for managing rules and capture operations
 - **Automatic Forwarding**: Forwards suspicious packet analysis to external endpoints
 - **Health Monitoring**: Status endpoints for system monitoring
 - **MongoDB Rules Storage**: Persistent storage of detection rules and configurations
+- **Render Deployment Ready**: Configured for cloud deployment with environment variables
+- **CORS Support**: Cross-origin resource sharing for external API access
 
 ### 6. **Database Integration**
 - **PostgreSQL Backend**: Full database integration with connection pooling
 - **Automatic Schema Creation**: Tables created on first run
-- **User Management**: Complete user lifecycle management
+- **User Management**: Complete user lifecycle management with email verification
 - **Session Storage**: Secure session token management
 - **Call Logs**: Infrastructure for storing call data
 - **Suspicious Activities**: Framework for tracking security events
+- **Analysis Reports**: Storage for VoIP analysis results and reports
+- **Unverified User Handling**: Smart handling of incomplete registrations
 
 ## 🏗️ Technical Architecture
 
@@ -181,12 +195,14 @@ The next phase will focus on transitioning from this prototype to a production-r
 - **Nodemailer**: Email service for OTP delivery
 - **Server Actions**: Secure server-side operations
 
-### **Real-time Analysis Server** (NEW!)
+### **Real-time Analysis Server**
 - **Node.js Express**: Dedicated packet analysis server (Port 3001)
 - **MongoDB**: Rules storage and packet analysis data
 - **TShark Integration**: Real-time network packet capture
 - **RESTful API**: Complete API for packet analysis operations
 - **Automatic Forwarding**: Integration with main application
+- **Render Deployment**: Cloud-ready configuration with environment variables
+- **Custom Scrollbars**: Enhanced UI with custom scrollbar styling
 
 ### **Database Schema**
 ```sql
@@ -310,41 +326,58 @@ suspicious_activities (id, user_id, activity_type, description, severity, ip_add
 ## 🚧 Development Status
 
 ### **✅ Completed Features**
-- Complete authentication system
-- Dataset creator with advanced generation
-- VoIP monitor with real analysis
-- Dashboard with real-time stats
-- Database integration
-- Responsive UI/UX
-- Guest mode functionality
-- CSV export/import
-- HTML report generation
+- Complete authentication system with email verification and guest mode
+- Dataset creator with advanced generation and realistic patterns
+- VoIP monitor with comprehensive analysis and reporting
+- Real-time dashboard with live stats and monitoring
+- Database integration with PostgreSQL and MongoDB
+- Responsive UI/UX with custom scrollbars
+- Real-time packet analysis server with TShark integration
+- CSV export/import with advanced processing
+- HTML report generation with detailed analysis
+- Real-time notification system with pop-in alerts
+- Threat intelligence database with rule-based detection
+- Render deployment configuration for cloud hosting
+- Unverified user handling and smart signup flow
 
 ### **🔄 In Development**
-- Analytics dashboard (UI ready, data integration pending)
-- Advanced settings (UI ready, functionality pending)
-- Email service integration (infrastructure ready)
-- Real-time monitoring (infrastructure ready)
+- Advanced analytics dashboard with enhanced charts
+- Machine learning detection algorithms
+- External threat intelligence integration
+- Mobile application development
 
 ### **📋 Planned Features**
-- Real-time call monitoring
-- Advanced analytics and charts
-- Machine learning detection
-- API integrations
-- Mobile application
-- Enterprise features
+- Advanced protocol parsing for deeper SIP/RTP analysis
+- Third-party security tool integrations
+- Enhanced real-time monitoring capabilities
+- Enterprise features and multi-tenant support
+- Advanced reporting and analytics
+- API integrations with commercial threat feeds
 
 ## 🛠️ Installation & Setup
 
 ### **Prerequisites**
 - Node.js 18+ 
 - PostgreSQL database
+- MongoDB database (for packet analysis server)
 - Email service (for OTP delivery)
+- TShark/Wireshark (for packet capture)
 
 ### **Environment Variables**
 ```env
+# Main Application
 DATABASE_URL=postgresql://username:password@localhost:5432/voip_trace
 NODE_ENV=development
+JWT_SECRET=your_jwt_secret_here
+
+# Email Service
+EMAIL_USER=your_email@domain.com
+EMAIL_PASS=your_email_password
+
+# Packet Analysis Server (Port 3001)
+MONGODB_URI=mongodb://localhost:27017/voip_trace
+TSHARK_INTERFACE=any
+TSHARK_FILTER=tcp or udp
 ```
 
 ### **Installation**
@@ -353,18 +386,31 @@ NODE_ENV=development
 git clone <repository-url>
 cd voip_trace
 
-# Install dependencies
+# Install main application dependencies
 npm install
+
+# Install packet analysis server dependencies
+cd server
+npm install
+cd ..
 
 # Set up environment variables
 cp .env.example .env.local
+cp server/env.example server/.env
 
-# Run development server
+# Run development servers
+# Terminal 1: Main application (Port 3000)
+npm run dev
+
+# Terminal 2: Packet analysis server (Port 3001)
+cd server
 npm run dev
 ```
 
 ### **Database Setup**
-The application automatically creates required tables on first run. Ensure your PostgreSQL database is accessible and the `DATABASE_URL` is correctly configured.
+The application automatically creates required tables on first run. Ensure your databases are accessible:
+- **PostgreSQL**: Main application database (users, sessions, reports)
+- **MongoDB**: Packet analysis server database (rules, packet data)
 
 ## 🎯 Use Cases
 

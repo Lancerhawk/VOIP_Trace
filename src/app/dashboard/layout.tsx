@@ -182,7 +182,7 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
       }`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-700">
+          <div className="flex items-center justify-between p-6 border-b border-slate-700 flex-shrink-0">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Shield className="w-6 h-6 text-white" />
@@ -199,31 +199,31 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
             </button>
           </div>
 
-                     {/* User Info */}
-           <div className="p-6 border-b border-slate-700">
-             <div className="flex items-center space-x-3">
-               <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                 <User className="w-6 h-6 text-white" />
-               </div>
-               <div>
-                 <p className="text-sm font-semibold text-white">{user.username}</p>
-                 <p className="text-xs text-slate-400">{user.email}</p>
-                 {isGuestMode && (
-                   <div className="flex items-center mt-1">
-                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                       </svg>
-                       Guest User
-                     </span>
-                   </div>
-                 )}
-               </div>
-             </div>
-           </div>
+          {/* User Info */}
+          <div className="p-6 border-b border-slate-700 flex-shrink-0">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                <User className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">{user.username}</p>
+                <p className="text-xs text-slate-400">{user.email}</p>
+                {isGuestMode && (
+                  <div className="flex items-center mt-1">
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      Guest User
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          {/* Navigation - Scrollable */}
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-sidebar">
             {filteredNavigation.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -254,7 +254,8 @@ export default function DashboardLayout({children}: {children: React.ReactNode})
             })}
           </nav>
 
-          <div className="p-4 border-t border-slate-700">
+          {/* Footer - Fixed */}
+          <div className="p-4 border-t border-slate-700 flex-shrink-0">
             <button
               onClick={handleSignOut}
               className="w-full cursor-pointer flex items-center px-4 py-3 text-sm font-medium text-slate-300 rounded-xl hover:bg-red-600 hover:text-white transition-all duration-200 group"

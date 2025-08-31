@@ -181,6 +181,19 @@ export const getUserByUsername = async (username: string) => {
   }
 };
 
+export const deleteUnverifiedUser = async (email: string) => {
+  await ensureDatabaseInitialized();
+  try {
+    const result = await pool.query(
+      'DELETE FROM users WHERE email = $1 AND email_verified = FALSE RETURNING id',
+      [email]
+    );
+    return result.rows.length > 0;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const updateEmailVerification = async (userId: number) => {
   await ensureDatabaseInitialized();
   try {

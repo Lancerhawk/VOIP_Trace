@@ -5,13 +5,13 @@ import Link from 'next/link';
 export default function ServicesPage() {
   const services = [
     {
-      title: "Call Log Monitoring",
-      description: "Comprehensive monitoring of all VoIP call activities with real-time analytics and reporting.",
+      title: "Real-Time Packet Analysis",
+      description: "Live network traffic monitoring with TShark integration for comprehensive VoIP analysis and threat detection.",
       features: [
-        "Real-time call tracking and logging",
-        "Advanced filtering and search capabilities",
-        "Customizable alert thresholds",
-        "Historical data analysis"
+        "Real-time packet capture and analysis",
+        "TShark integration for deep packet inspection",
+        "Live network traffic monitoring",
+        "Automated packet forwarding"
       ],
       icon: (
         <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,12 +21,12 @@ export default function ServicesPage() {
       color: "from-blue-500 to-blue-600"
     },
     {
-      title: "Threat Detection",
-      description: "AI-powered detection of suspicious activities and potential security threats in your VoIP network.",
+      title: "Threat Detection & Analysis",
+      description: "Advanced detection rules for suspicious patterns, fraud detection, and anomalous communication behavior analysis.",
       features: [
-        "Machine learning-based anomaly detection",
-        "Fraud pattern recognition",
-        "DDoS attack prevention",
+        "6+ comprehensive detection rules",
+        "Suspicious pattern recognition",
+        "Fraud and bot network detection",
         "Real-time threat alerts"
       ],
       icon: (
@@ -37,13 +37,13 @@ export default function ServicesPage() {
       color: "from-red-500 to-red-600"
     },
     {
-      title: "Performance Analytics",
-      description: "Deep insights into call quality, network performance, and system optimization opportunities.",
+      title: "Synthetic Data Generation",
+      description: "Create realistic VoIP call datasets for testing and validation with configurable parameters and patterns.",
       features: [
-        "Call quality metrics (MOS, RTT, Jitter)",
-        "Network performance monitoring",
-        "Capacity planning insights",
-        "Performance trend analysis"
+        "Configurable dataset parameters",
+        "Realistic user profiles and metadata",
+        "Smart connection distribution",
+        "VPN detection patterns"
       ],
       icon: (
         <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,13 +53,13 @@ export default function ServicesPage() {
       color: "from-green-500 to-green-600"
     },
     {
-      title: "Compliance & Reporting",
-      description: "Built-in compliance features and comprehensive reporting for regulatory requirements.",
+      title: "Comprehensive Reporting",
+      description: "Generate detailed HTML reports for evidence documentation and case analysis for law enforcement use.",
       features: [
-        "GDPR compliance tools",
-        "HIPAA compliance features",
-        "Custom report generation",
-        "Audit trail management"
+        "Detailed HTML analysis reports",
+        "Evidence documentation",
+        "Case analysis support",
+        "Downloadable reports"
       ],
       icon: (
         <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,33 +69,33 @@ export default function ServicesPage() {
       color: "from-purple-500 to-purple-600"
     },
     {
-      title: "API Integration",
-      description: "Seamless integration with your existing systems through powerful REST APIs and webhooks.",
+      title: "Real-Time Monitoring Dashboard",
+      description: "Live dashboard with real-time statistics, system monitoring, and activity tracking capabilities.",
       features: [
-        "RESTful API endpoints",
-        "Webhook notifications",
-        "SDK libraries available",
-        "Custom integration support"
+        "Real-time statistics display",
+        "System status monitoring",
+        "Activity tracking and logs",
+        "Guest mode support"
       ],
       icon: (
         <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
       color: "from-orange-500 to-orange-600"
     },
     {
-      title: "24/7 Support",
-      description: "Round-the-clock technical support and monitoring to ensure your system runs smoothly.",
+      title: "Secure Authentication",
+      description: "Complete user management system with email verification, guest mode, and secure session handling.",
       features: [
-        "24/7 technical support",
-        "Priority issue resolution",
-        "Dedicated account manager",
-        "Training and onboarding"
+        "Email-based registration and verification",
+        "OTP verification system",
+        "Guest mode for testing",
+        "Secure session management"
       ],
       icon: (
         <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
         </svg>
       ),
       color: "from-indigo-500 to-indigo-600"
@@ -104,48 +104,49 @@ export default function ServicesPage() {
 
   const pricingPlans = [
     {
-      name: "Starter",
-      price: "$99",
-      period: "/month",
-      description: "Perfect for small businesses getting started with VoIP monitoring",
+      name: "Guest Access",
+      price: "Free",
+      period: "",
+      description: "Try the system with guest mode for testing and evaluation",
       features: [
-        "Up to 1,000 calls/month",
-        "Basic threat detection",
-        "Standard reporting",
-        "Email support",
-        "Basic analytics"
+        "Full system access",
+        "Real-time packet analysis",
+        "Threat detection",
+        "Synthetic data generation",
+        "Comprehensive reporting",
+        "7-day trial period"
       ],
-      popular: false,
-      cta: "Get Started"
+      popular: true,
+      cta: "Try Guest Mode"
     },
     {
       name: "Professional",
-      price: "$299",
-      period: "/month",
-      description: "Ideal for growing businesses with advanced monitoring needs",
+      price: "Contact Us",
+      period: "",
+      description: "Full access for law enforcement and security professionals",
       features: [
-        "Up to 10,000 calls/month",
+        "Complete system access",
+        "Real-time monitoring",
         "Advanced threat detection",
-        "Custom reporting",
-        "Priority support",
-        "Advanced analytics",
-        "API access"
+        "Evidence reporting",
+        "Technical support",
+        "Custom configurations"
       ],
-      popular: true,
-      cta: "Start Free Trial"
+      popular: false,
+      cta: "Contact Sales"
     },
     {
       name: "Enterprise",
       price: "Custom",
       period: "",
-      description: "Tailored solutions for large enterprises with complex requirements",
+      description: "Tailored solutions for large organizations with specific requirements",
       features: [
-        "Unlimited calls",
-        "AI-powered threat detection",
+        "Unlimited access",
         "Custom integrations",
         "Dedicated support",
         "Advanced compliance",
-        "Custom SLAs"
+        "Custom SLAs",
+        "Training and onboarding"
       ],
       popular: false,
       cta: "Contact Sales"
@@ -161,7 +162,7 @@ export default function ServicesPage() {
             Our Services
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Comprehensive VoIP monitoring and security solutions designed to protect your business communications
+            Advanced VoIP analysis and security solutions for law enforcement, security professionals, and telecom administrators
           </p>
         </div>
       </section>
@@ -174,7 +175,7 @@ export default function ServicesPage() {
               What We Offer
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From basic monitoring to advanced security, we have the tools you need to protect your VoIP infrastructure
+              Comprehensive VoIP analysis and security tools for law enforcement, security professionals, and telecom administrators
             </p>
           </div>
           
@@ -207,10 +208,10 @@ export default function ServicesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Simple, Transparent Pricing
+              Access Options
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Choose the plan that fits your business needs. All plans include our core security features.
+              Choose the access level that fits your needs. All options include our core analysis and security features.
             </p>
           </div>
           
@@ -246,16 +247,31 @@ export default function ServicesPage() {
                 </ul>
                 
                 <div className="text-center">
-                  {plan.name === "Enterprise" ? (
-                    <Link 
-                      href="/contact" 
-                      className="w-full inline-block px-6 py-3 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 transition-colors duration-300"
+                  {plan.name === "Guest Access" ? (
+                    <button 
+                      onClick={() => {
+                        const guestEmail = `guest_${Date.now()}@voiptrace.guest`;
+                        const guestPassword = `guest_${Math.random().toString(36).substring(2, 15)}`;
+                        
+                        const trialExpiry = new Date();
+                        trialExpiry.setDate(trialExpiry.getDate() + 7);
+                        const maxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+                        
+                        document.cookie = `guest_email=${guestEmail}; path=/; max-age=${maxAge}`; 
+                        document.cookie = `guest_password=${guestPassword}; path=/; max-age=${maxAge}`;
+                        document.cookie = `guest_username=User; path=/; max-age=${maxAge}`; 
+                        document.cookie = `guest_mode=true; path=/; max-age=${maxAge}`;
+                        document.cookie = `guest_trial_expiry=${trialExpiry.toISOString()}; path=/; max-age=${maxAge}`; 
+                        
+                        window.location.href = '/dashboard';
+                      }}
+                      className="w-full inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors duration-300 cursor-pointer"
                     >
                       {plan.cta}
-                    </Link>
+                    </button>
                   ) : (
                     <Link 
-                      href="/authpage/sign_up" 
+                      href="/contact" 
                       className={`w-full inline-block px-6 py-3 font-semibold rounded-xl transition-colors duration-300 ${
                         plan.popular 
                           ? 'bg-blue-600 text-white hover:bg-blue-700' 
@@ -279,7 +295,7 @@ export default function ServicesPage() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-12">
-            Join thousands of businesses that trust VoIP Trace for their communication security needs.
+            Start analyzing VoIP communications with our comprehensive security platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 

@@ -325,11 +325,14 @@ export default function DashboardHome() {
                   <p className="text-sm font-medium text-gray-600">{stat.label}</p>
                   <p className="text-2xl font-bold text-gray-900">
                     {isLoading ? '...' : 
-                     stat.value === '0' && stats.recentScans === 0 ? 'Coming Soon' : 
+                     stat.value === '0' && stats.recentScans === 0 ? 
+                       (isGuestMode ? 'Sign up to use' : '0') : 
                      stat.value}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {stat.value === '0' && stats.recentScans === 0 ? 'Upload data to see real stats' : stat.description}
+                    {stat.value === '0' && stats.recentScans === 0 ? 
+                      (isGuestMode ? 'Sign up to access this feature' : 'No data available yet') : 
+                      stat.description}
                   </p>
                 </div>
               </div>
@@ -368,7 +371,7 @@ export default function DashboardHome() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Activity</h2>
           <div className="space-y-4">
-            {/* Show real activity if available, otherwise show Coming Soon */}
+            {/* Show real activity if available, otherwise show appropriate message */}
             {stats.recentScans > 0 ? (
               recentActivity.map((activity, index) => (
                 <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -389,11 +392,23 @@ export default function DashboardHome() {
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Activity className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Coming Soon</h3>
-                <p className="text-gray-600">Real-time activity tracking will be available after your first analysis</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {isGuestMode ? 'Sign up to use this feature' : 'No recent activity'}
+                </h3>
+                <p className="text-gray-600">
+                  {isGuestMode 
+                    ? 'Sign up to access real-time activity tracking and monitoring features'
+                    : 'Activity tracking will be available after your first analysis'
+                  }
+                </p>
                 <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-gray-500">
                   <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                  <span>Upload data to see live activity</span>
+                  <span>
+                    {isGuestMode 
+                      ? 'Sign up to enable live activity monitoring'
+                      : 'Upload data to see live activity'
+                    }
+                  </span>
                 </div>
               </div>
             )}
@@ -404,7 +419,7 @@ export default function DashboardHome() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">System Overview</h2>
           <div className="space-y-4">
-            {/* Show real stats if available, otherwise show Coming Soon */}
+            {/* Show real stats if available, otherwise show appropriate message */}
             {stats.recentScans > 0 ? (
               <>
                 {systemStatusCards.map((stat, index) => {
@@ -472,11 +487,23 @@ export default function DashboardHome() {
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Coming Soon</h3>
-                <p className="text-gray-600">System monitoring and alerts will be available after your first analysis</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  {isGuestMode ? 'Sign up to use this feature' : 'No system data available'}
+                </h3>
+                <p className="text-gray-600">
+                  {isGuestMode 
+                    ? 'Sign up to access system monitoring and security alerts'
+                    : 'System monitoring and alerts will be available after your first analysis'
+                  }
+                </p>
                 <div className="mt-4 flex items-center justify-center space-x-2 text-sm text-gray-500">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  <span>Upload data to enable monitoring</span>
+                  <span>
+                    {isGuestMode 
+                      ? 'Sign up to enable system monitoring'
+                      : 'Upload data to enable monitoring'
+                    }
+                  </span>
                 </div>
               </div>
             )}

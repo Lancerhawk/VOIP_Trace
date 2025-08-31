@@ -46,7 +46,7 @@ export const sendOTPEmail = async (email: string, otp: string): Promise<boolean>
             
             <div style="border-top: 1px solid #e5e7eb; margin-top: 30px; padding-top: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © 2024 VoIP Trace. All rights reserved.
+                © 2025 VoIP Trace. All rights reserved.
               </p>
             </div>
           </div>
@@ -98,7 +98,7 @@ export const sendWelcomeEmail = async (email: string, username: string): Promise
             
             <div style="border-top: 1px solid #e5e7eb; margin-top: 30px; padding-top: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © 2024 VoIP Trace. All rights reserved.
+                © 2025 VoIP Trace. All rights reserved.
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string):
             
             <div style="border-top: 1px solid #e5e7eb; margin-top: 30px; padding-top: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © 2024 VoIP Trace. All rights reserved.
+                © 2025 VoIP Trace. All rights reserved.
               </p>
             </div>
           </div>

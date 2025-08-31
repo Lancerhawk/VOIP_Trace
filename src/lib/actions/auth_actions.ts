@@ -2,7 +2,7 @@
 
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
-import { createUser, getUserByEmail, updateEmailVerification, createOTP, verifyOTP, createSession, deleteSession, getSessionByToken, getUserById } from '../postgresql';
+import { createUser, getUserByEmail, getUserByUsername, deleteUnverifiedUser, updateEmailVerification, createOTP, verifyOTP, createSession, deleteSession, getSessionByToken, getUserById } from '../postgresql';
 import { generateOTP, sendOTPEmail, sendWelcomeEmail } from '../email';
 
 // Sign up action
@@ -16,15 +16,28 @@ export async function signUpAction(formData: FormData) {
       return { success: false, error: 'All fields are required' };
     }
 
-    // Check if user already exists
+    // Check if username already exists
+    const existingUsername = await getUserByUsername(username);
+    if (existingUsername) {
+      return { success: false, error: 'Username already exists. Please choose a different username.' };
+    }
+
+    // Check if user with email already exists
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
-      return { success: false, error: 'User with this email already exists' };
+      // If user exists and is verified, return error
+      if (existingUser.email_verified) {
+        return { success: false, error: 'User with this email already exists' };
+      }
+      
+      // If user exists but is not verified, delete the old record and continue
+      await deleteUnverifiedUser(email);
     }
 
     // Hash password
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
+    
     // Create user
     const user = await createUser(email, username, passwordHash);
 
@@ -49,6 +62,16 @@ export async function signUpAction(formData: FormData) {
 // Send OTP action
 export async function sendOTPAction(email: string) {
   try {
+    // Check if user exists and is unverified
+    const existingUser = await getUserByEmail(email);
+    if (!existingUser) {
+      return { success: false, error: 'No account found with this email address.' };
+    }
+    
+    if (existingUser.email_verified) {
+      return { success: false, error: 'Email is already verified. You can sign in directly.' };
+    }
+
     // Generate and send OTP
     const otp = generateOTP();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
@@ -63,6 +86,39 @@ export async function sendOTPAction(email: string) {
   } catch (error) {
     console.error('Send OTP error:', error);
     return { success: false, error: 'Failed to send OTP. Please try again.' };
+  }
+}
+
+// Check unverified user action
+export async function checkUnverifiedUserAction(email: string) {
+  try {
+    const existingUser = await getUserByEmail(email);
+    
+    if (!existingUser) {
+      return { 
+        success: false, 
+        error: 'No account found with this email address.',
+        canResend: false 
+      };
+    }
+    
+    if (existingUser.email_verified) {
+      return { 
+        success: false, 
+        error: 'Email is already verified. You can sign in directly.',
+        canResend: false 
+      };
+    }
+    
+    return { 
+      success: true, 
+      message: 'Unverified account found. You can resend OTP.',
+      canResend: true,
+      username: existingUser.username 
+    };
+  } catch (error) {
+    console.error('Check unverified user error:', error);
+    return { success: false, error: 'Failed to check account status.' };
   }
 }
 

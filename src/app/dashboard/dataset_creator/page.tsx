@@ -476,7 +476,7 @@ export default function DatasetCreator() {
                                 </div>
                                 <div className="flex-1 ml-3">
                                     <p className="text-xs text-red-700">
-                                        Suspicious users are automatically assigned to blocked countries (RU, CN, KP, IR, SY, VE, CU, MM, BY, UZ) for geographic-based threat detection
+                                        Suspicious users are automatically assigned according to the provided government database to blocked countries (RU, CN, KP, IR, SY, VE, CU, MM, BY, UZ) for geographic-based threat detection
                                     </p>
                                 </div>
                             </div>

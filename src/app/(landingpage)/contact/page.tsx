@@ -48,10 +48,10 @@ export default function ContactPage() {
 
   const contactMethods = [
     {
-      title: "Sales Inquiries",
-      description: "Get pricing information and product demos",
-      email: "sales@voiptrace.com",
-      phone: "+1 (555) 123-4567",
+      title: "General Inquiries",
+      description: "Questions about our VoIP analysis platform and capabilities",
+      email: "70001933arin@gmail.com",
+      phone: "Contact via form below",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -60,9 +60,9 @@ export default function ContactPage() {
     },
     {
       title: "Technical Support",
-      description: "Get help with your VoIP Trace implementation",
-      email: "support@voiptrace.com",
-      phone: "+1 (555) 123-4568",
+      description: "Get help with platform implementation and usage",
+      email: "70001933arin@gmail.com",
+      phone: "Contact via form below",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -72,9 +72,9 @@ export default function ContactPage() {
     },
     {
       title: "Partnerships",
-      description: "Explore business partnerships and integrations",
-      email: "partnerships@voiptrace.com",
-      phone: "+1 (555) 123-4569",
+      description: "Explore collaboration opportunities and integrations",
+      email: "70001933arin@gmail.com",
+      phone: "Contact via form below",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -85,46 +85,28 @@ export default function ContactPage() {
 
   const offices = [
     {
-      city: "San Francisco",
-      country: "United States",
-      address: "123 Innovation Drive, Suite 100",
-      zip: "San Francisco, CA 94105",
-      phone: "+1 (555) 123-4567",
-      email: "sf@voiptrace.com"
-    },
-    {
-      city: "London",
-      country: "United Kingdom",
-      address: "456 Tech Square, Floor 3",
-      zip: "London, EC2A 4BX",
-      phone: "+44 20 1234 5678",
-      email: "london@voiptrace.com"
-    },
-    {
-      city: "Singapore",
-      country: "Singapore",
-      address: "789 Digital Hub, Level 5",
-      zip: "Singapore 018956",
-      phone: "+65 6123 4567",
-      email: "sg@voiptrace.com"
+      city: "Jabalpur",
+      country: "India",
+      address: "Jabalpur, MP, India",
+      zip: "482001",
+      phone: "+91 9301459291",
+      email: "70001933arin@gmail.com"
     }
   ];
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-gray-50 to-blue-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
             Get in Touch
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Ready to secure your VoIP infrastructure? Let's start a conversation about how we can help protect your business communications.
+            Ready to analyze VoIP communications? Let's start a conversation about how we can help with your security and analysis needs.
           </p>
         </div>
       </section>
 
-      {/* Contact Methods */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
@@ -164,11 +146,9 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Form & Office Locations */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50 text-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16">
-            {/* Contact Form */}
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-8">
                 Send Us a Message
@@ -310,7 +290,7 @@ export default function ContactPage() {
             {/* Office Locations */}
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                Our Offices
+                Our Location
               </h2>
               
               <div className="space-y-6">
@@ -366,19 +346,19 @@ export default function ContactPage() {
             {[
               {
                 question: "How quickly can I get started with VoIP Trace?",
-                answer: "You can start monitoring your VoIP calls within minutes of signing up. Our platform is designed for quick deployment and easy integration."
+                answer: "You can start analyzing VoIP communications immediately using our guest mode. Simply click 'Try Guest Mode' to access the full platform without registration."
               },
               {
-                question: "What types of VoIP systems do you support?",
-                answer: "We support all major VoIP platforms including Cisco, Avaya, Asterisk, FreePBX, and custom solutions. Our API allows integration with virtually any system."
+                question: "What types of analysis does the platform provide?",
+                answer: "Our platform provides real-time packet capture, threat detection with 6+ detection rules, synthetic data generation, and comprehensive reporting for law enforcement and security professionals."
               },
               {
-                question: "Is there a free trial available?",
-                answer: "Yes! We offer a 14-day free trial with full access to all features. No credit card required to get started."
+                question: "Is there a free way to try the system?",
+                answer: "Yes! We offer guest mode access that provides full system functionality for testing and evaluation. No registration required to get started."
               },
               {
                 question: "What kind of support do you provide?",
-                answer: "We provide 24/7 technical support via email, phone, and live chat. Enterprise customers also get dedicated account managers."
+                answer: "We provide technical support via email and our contact form. Our platform is designed for security professionals and law enforcement use cases."
               }
             ].map((faq, index) => (
               <div key={index} className="bg-gray-50 rounded-2xl p-6">
@@ -397,7 +377,7 @@ export default function ContactPage() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-blue-100 mb-12">
-            Join thousands of businesses that trust VoIP Trace for their communication security needs.
+            Start analyzing VoIP communications with our comprehensive security platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
