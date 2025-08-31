@@ -1,20 +1,16 @@
 import { Pool } from 'pg';
 
-// Database configuration
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
-// Track if database has been initialized
 let isDatabaseInitialized = false;
 
-// Initialize database tables
 const initializeDatabase = async () => {
   try {
     const client = await pool.connect();
     
-    // Create users table
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -27,7 +23,6 @@ const initializeDatabase = async () => {
       );
     `);
 
-    // Create otp_verifications table
     await client.query(`
       CREATE TABLE IF NOT EXISTS otp_verifications (
         id SERIAL PRIMARY KEY,
@@ -38,7 +33,6 @@ const initializeDatabase = async () => {
       );
     `);
 
-    // Create call_logs table
     await client.query(`
       CREATE TABLE IF NOT EXISTS call_logs (
         id SERIAL PRIMARY KEY,
@@ -54,7 +48,6 @@ const initializeDatabase = async () => {
       );
     `);
 
-    // Create suspicious_activities table
     await client.query(`
       CREATE TABLE IF NOT EXISTS suspicious_activities (
         id SERIAL PRIMARY KEY,
@@ -68,7 +61,6 @@ const initializeDatabase = async () => {
       );
     `);
 
-    // Create user_sessions table
     await client.query(`
       CREATE TABLE IF NOT EXISTS user_sessions (
         id SERIAL PRIMARY KEY,
@@ -79,7 +71,6 @@ const initializeDatabase = async () => {
       );
     `);
 
-    // Create voip_analysis_reports table
     await client.query(`
       CREATE TABLE IF NOT EXISTS voip_analysis_reports (
         id SERIAL PRIMARY KEY,
@@ -99,13 +90,11 @@ const initializeDatabase = async () => {
       );
     `);
 
-    // Add uploaded_files column if it doesn't exist (for existing tables)
     await client.query(`
       ALTER TABLE voip_analysis_reports 
       ADD COLUMN IF NOT EXISTS uploaded_files JSONB;
     `);
 
-    // Add html_report column if it doesn't exist (for existing tables)
     await client.query(`
       ALTER TABLE voip_analysis_reports 
       ADD COLUMN IF NOT EXISTS html_report TEXT;
@@ -121,14 +110,12 @@ const initializeDatabase = async () => {
   }
 };
 
-// Ensure database is initialized before any operation
 const ensureDatabaseInitialized = async () => {
   if (!isDatabaseInitialized) {
     await initializeDatabase();
   }
 };
 
-// Test database connection
 export const testConnection = async () => {
   try {
     const client = await pool.connect();
@@ -141,7 +128,6 @@ export const testConnection = async () => {
   }
 };
 
-// User operations
 export const createUser = async (email: string, username: string, passwordHash: string) => {
   await ensureDatabaseInitialized();
   try {
@@ -207,14 +193,11 @@ export const updateEmailVerification = async (userId: number) => {
   }
 };
 
-// OTP operations
 export const createOTP = async (email: string, otp: string, expiresAt: Date) => {
   await ensureDatabaseInitialized();
   try {
-    // Delete existing OTP for this email
     await pool.query('DELETE FROM otp_verifications WHERE email = $1', [email]);
     
-    // Create new OTP
     const result = await pool.query(
       'INSERT INTO otp_verifications (email, otp, expires_at) VALUES ($1, $2, $3) RETURNING id',
       [email, otp, expiresAt]
@@ -234,7 +217,6 @@ export const verifyOTP = async (email: string, otp: string) => {
     );
     
     if (result.rows.length > 0) {
-      // Delete the used OTP
       await pool.query('DELETE FROM otp_verifications WHERE email = $1 AND otp = $2', [email, otp]);
       return true;
     }
@@ -244,7 +226,6 @@ export const verifyOTP = async (email: string, otp: string) => {
   }
 };
 
-// Session operations
 export const createSession = async (userId: number, sessionToken: string, expiresAt: Date) => {
   await ensureDatabaseInitialized();
   try {
@@ -294,7 +275,6 @@ export const deleteSession = async (sessionToken: string) => {
   }
 };
 
-// User operations
 export const getUserById = async (userId: number) => {
   await ensureDatabaseInitialized();
   try {
@@ -308,7 +288,6 @@ export const getUserById = async (userId: number) => {
   }
 };
 
-// Call log operations
 export const createCallLog = async (userId: number, callData: any) => {
   await ensureDatabaseInitialized();
   try {
@@ -336,7 +315,6 @@ export const getCallLogs = async (userId: number, limit: number = 100) => {
   }
 };
 
-// Suspicious activity operations
 export const createSuspiciousActivity = async (userId: number, activityData: any) => {
   await ensureDatabaseInitialized();
   try {
@@ -364,11 +342,9 @@ export const getSuspiciousActivities = async (userId: number, limit: number = 50
   }
 };
 
-// VoIP Analysis Reports operations
 export const createVoipAnalysisReport = async (userId: number, reportData: any) => {
   await ensureDatabaseInitialized();
   try {
-    // First try with all columns
     let result;
     try {
       result = await pool.query(
@@ -389,7 +365,6 @@ export const createVoipAnalysisReport = async (userId: number, reportData: any) 
         ]
       );
     } catch (columnError) {
-      // If columns don't exist, fallback to basic insert
       console.log('Some columns not found, using fallback insert');
       result = await pool.query(
         `INSERT INTO voip_analysis_reports (user_id, report_name, total_users, total_connections, suspicious_users, suspicious_connections, vpn_users, blocked_country_users, analysis_data) 
@@ -417,7 +392,6 @@ export const createVoipAnalysisReport = async (userId: number, reportData: any) 
 export const getVoipAnalysisReports = async (userId: number, limit: number = 50) => {
   await ensureDatabaseInitialized();
   try {
-    // First try with uploaded_files column
     let result;
     try {
       result = await pool.query(
@@ -425,7 +399,6 @@ export const getVoipAnalysisReports = async (userId: number, limit: number = 50)
         [userId, limit]
       );
     } catch (columnError) {
-      // If uploaded_files column doesn't exist, fallback to basic query
       console.log('uploaded_files column not found, using fallback query');
       result = await pool.query(
         'SELECT id, report_name, total_users, total_connections, suspicious_users, suspicious_connections, vpn_users, blocked_country_users, created_at FROM voip_analysis_reports WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2',
@@ -433,7 +406,6 @@ export const getVoipAnalysisReports = async (userId: number, limit: number = 50)
       );
     }
     
-    // Parse uploaded_files JSON for each report
     const reports = result.rows.map(report => {
       if (report.uploaded_files && typeof report.uploaded_files === 'string') {
         try {
@@ -463,17 +435,14 @@ export const getVoipAnalysisReportById = async (reportId: number, userId: number
     if (result.rows.length > 0) {
       const report = result.rows[0];
       
-      // Parse analysis_data if it's a string, otherwise keep as is
       if (typeof report.analysis_data === 'string') {
         try {
           report.analysis_data = JSON.parse(report.analysis_data);
         } catch (parseError) {
           console.log('Error parsing analysis_data JSON:', parseError);
-          // Keep as string if parsing fails
         }
       }
       
-      // Parse uploaded_files if it exists and is a string
       if (report.uploaded_files && typeof report.uploaded_files === 'string') {
         try {
           report.uploaded_files = JSON.parse(report.uploaded_files);

@@ -44,25 +44,25 @@ export default function AboutPage() {
       name: "Kartik Jain",
       role: "Research & Development",
       bio: "Research specialist and AI/ML enthusiast with focus on innovative solutions.",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
+      image: "./pics/kartik.jpg"
     },
     {
       name: "Shachi Shukla",
       role: "AI/ML Expert",
       bio: "AI/ML expert creating intelligent logic and algorithms for the system.",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
+      image: "./pics/shachi.jpg"
     },
     {
       name: "Arpit Shukla",
       role: "Frontend Developer",
       bio: "Frontend developer passionate about creating beautiful and responsive user interfaces.",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
+      image: ""
     },
     {
       name: "Aastha Singh",
       role: "Data Handler",
       bio: "Data specialist handling system data and creating comprehensive datasets for analysis.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80"
+      image: ""
     }
   ];
 
